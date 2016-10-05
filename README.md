@@ -24,7 +24,30 @@ import (
 
 func main() {
     cache := &cachego.Memcached{
-        memached.New("localhost:11211")
+        memcached.New("localhost:11211")
+    }
+
+    cache.Save("foo", "bar")
+
+    value := cache.Fetch("foo")
+    ...
+}
+```
+
+### Redis
+```go
+package main
+
+import (
+    "github.com/fabiorphp/cachego"
+	"gopkg.in/redis.v4"
+)
+
+func main() {
+	s.cache = &cachego.Redis{
+	    redis.NewClient(&redis.Options{
+            Addr: ":6379",
+	    }),
     }
 
     cache.Save("foo", "bar")

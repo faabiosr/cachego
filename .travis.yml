@@ -8,6 +8,7 @@ go:
 
 services:
   - memcached
+  - redis-server
 
 before_install:
   - go get github.com/axw/gocov/gocov

@@ -100,6 +100,6 @@ func (s *MemcachedTestSuite) TestFlush() {
 	s.assert.False(s.cache.Contains("foo"))
 }
 
-func TestRunSuite(t *testing.T) {
+func TestMemcachedRunSuite(t *testing.T) {
 	suite.Run(t, new(MemcachedTestSuite))
 }
