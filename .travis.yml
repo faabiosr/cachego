@@ -6,6 +6,9 @@ go:
   - 1.7
   - tip
 
+services:
+  - memcached
+
 before_install:
   - go get github.com/axw/gocov/gocov
   - go get github.com/mattn/goveralls
