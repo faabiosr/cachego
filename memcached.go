@@ -2,6 +2,7 @@ package cachego
 
 import (
 	"github.com/bradfitz/gomemcache/memcache"
+	"time"
 )
 
 type Memcached struct {
@@ -26,11 +27,12 @@ func (m *Memcached) Fetch(key string) (string, bool) {
 	return value, true
 }
 
-func (m *Memcached) Save(key string, value string) bool {
+func (m *Memcached) Save(key string, value string, lifeTime time.Duration) bool {
 	err := m.driver.Set(
 		&memcache.Item{
-			Key:   key,
-			Value: []byte(value),
+			Key:        key,
+			Value:      []byte(value),
+			Expiration: int32(lifeTime.Seconds()),
 		},
 	)
 

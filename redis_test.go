@@ -30,18 +30,18 @@ func (s *RedisTestSuite) TestSaveReturnFalseWhenThrowError() {
 
 	cache := &Redis{redis}
 
-	s.assert.False(cache.Save("foo", "bar"))
+	s.assert.False(cache.Save("foo", "bar", 0))
 }
 
 func (s *RedisTestSuite) TestSave() {
-	s.assert.True(s.cache.Save("foo", "bar"))
+	s.assert.True(s.cache.Save("foo", "bar", 0))
 }
 
 func (s *RedisTestSuite) TestFetchReturnFalseWhenThrowError() {
 	key := "foo"
 	value := "bar"
 
-	s.cache.Save(key, value)
+	s.cache.Save(key, value, 0)
 
 	redis := redis.NewClient(&redis.Options{
 		Addr: ":6380",
@@ -58,7 +58,7 @@ func (s *RedisTestSuite) TestFetch() {
 	key := "foo"
 	value := "bar"
 
-	s.cache.Save(key, value)
+	s.cache.Save(key, value, 0)
 
 	result, status := s.cache.Fetch(key)
 
@@ -77,7 +77,7 @@ func (s *RedisTestSuite) TestContainsReturnFalseWhenThrowError() {
 }
 
 func (s *RedisTestSuite) TestContains() {
-	s.cache.Save("foo", "bar")
+	s.cache.Save("foo", "bar", 0)
 
 	s.assert.True(s.cache.Contains("foo"))
 	s.assert.False(s.cache.Contains("bar"))
@@ -93,7 +93,7 @@ func (s *RedisTestSuite) TestDeleteReturnFalseWhenThrowError() {
 }
 
 func (s *RedisTestSuite) TestDelete() {
-	s.cache.Save("foo", "bar")
+	s.cache.Save("foo", "bar", 0)
 
 	s.assert.True(s.cache.Delete("foo"))
 	s.assert.False(s.cache.Contains("foo"))
@@ -111,7 +111,7 @@ func (s *RedisTestSuite) TestFlushReturnFalseWhenThrowError() {
 }
 
 func (s *RedisTestSuite) TestFlush() {
-	s.cache.Save("foo", "bar")
+	s.cache.Save("foo", "bar", 0)
 
 	s.assert.True(s.cache.Flush())
 	s.assert.False(s.cache.Contains("foo"))

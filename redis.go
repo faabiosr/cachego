@@ -2,6 +2,7 @@ package cachego
 
 import (
 	"gopkg.in/redis.v4"
+	"time"
 )
 
 type Redis struct {
@@ -28,8 +29,8 @@ func (r *Redis) Contains(key string) bool {
 	return status
 }
 
-func (r *Redis) Save(key string, value string) bool {
-	err := r.driver.Set(key, value, 0).Err()
+func (r *Redis) Save(key string, value string, lifeTime time.Duration) bool {
+	err := r.driver.Set(key, value, lifeTime).Err()
 
 	if err != nil {
 		return false
