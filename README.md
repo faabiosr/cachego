@@ -11,6 +11,11 @@ Cachego requires Go 1.5 or later.
 go get github.com/fabiorphp/cachego
 ```
 
+If you want get an specific version, please use the example bellow:
+```
+go get gopkg.in/fabiorphp/cachego.v0
+```
+
 ## Usage
 
 ### Memcached
