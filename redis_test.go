@@ -4,6 +4,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"gopkg.in/redis.v4"
+	"net"
 	"testing"
 )
 
@@ -18,6 +19,10 @@ func (s *RedisTestSuite) SetupTest() {
 	conn := redis.NewClient(&redis.Options{
 		Addr: ":6379",
 	})
+
+	if _, err := net.Dial("tcp", "localhost:6379"); err != nil {
+		s.T().Skip()
+	}
 
 	s.cache = &Redis{conn}
 	s.assert = assert.New(s.T())
