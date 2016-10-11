@@ -122,6 +122,35 @@ func (s *RedisTestSuite) TestFlush() {
 	s.assert.False(s.cache.Contains("foo"))
 }
 
+func (s *RedisTestSuite) TestFetchMultiReturnNoItemsWhenThrowError() {
+	cache := &Redis{
+		redis.NewClient(&redis.Options{
+			Addr: ":6380",
+		}),
+	}
+
+	result := cache.FetchMulti([]string{"foo"})
+
+	s.assert.Len(result, 0)
+}
+
+func (s *RedisTestSuite) TestFetchMulti() {
+	s.cache.Save("foo", "bar", 0)
+	s.cache.Save("john", "doe", 0)
+
+	result := s.cache.FetchMulti([]string{"foo", "john"})
+
+	s.assert.Len(result, 2)
+}
+
+func (s *RedisTestSuite) TestFetchMultiWhenOnlyOneOfKeysExists() {
+	s.cache.Save("foo", "bar", 0)
+
+	result := s.cache.FetchMulti([]string{"foo", "alice"})
+
+	s.assert.Len(result, 1)
+}
+
 func TestRedisRunSuite(t *testing.T) {
 	suite.Run(t, new(RedisTestSuite))
 }

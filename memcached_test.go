@@ -101,6 +101,33 @@ func (s *MemcachedTestSuite) TestFlush() {
 	s.assert.False(s.cache.Contains("foo"))
 }
 
+func (s *MemcachedTestSuite) TestFetchMultiReturnNoItemsWhenThrowError() {
+	cache := &Memcached{
+		memcache.New("127.0.0.1:22222"),
+	}
+
+	result := cache.FetchMulti([]string{"foo"})
+
+	s.assert.Len(result, 0)
+}
+
+func (s *MemcachedTestSuite) TestFetchMulti() {
+	s.cache.Save("foo", "bar", 0)
+	s.cache.Save("john", "doe", 0)
+
+	result := s.cache.FetchMulti([]string{"foo", "john"})
+
+	s.assert.Len(result, 2)
+}
+
+func (s *MemcachedTestSuite) TestFetchMultiWhenOnlyOneOfKeysExists() {
+	s.cache.Save("foo", "bar", 0)
+
+	result := s.cache.FetchMulti([]string{"foo", "alice"})
+
+	s.assert.Len(result, 1)
+}
+
 func TestMemcachedRunSuite(t *testing.T) {
 	suite.Run(t, new(MemcachedTestSuite))
 }

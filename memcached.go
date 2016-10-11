@@ -27,6 +27,22 @@ func (m *Memcached) Fetch(key string) (string, bool) {
 	return value, true
 }
 
+func (m *Memcached) FetchMulti(keys []string) map[string]string {
+	result := make(map[string]string)
+
+	items, err := m.driver.GetMulti(keys)
+
+	if err != nil {
+		return result
+	}
+
+	for _, i := range items {
+		result[i.Key] = string(i.Value[:])
+	}
+
+	return result
+}
+
 func (m *Memcached) Save(key string, value string, lifeTime time.Duration) bool {
 	err := m.driver.Set(
 		&memcache.Item{

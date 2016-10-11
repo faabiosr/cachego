@@ -19,6 +19,24 @@ func (r *Redis) Fetch(key string) (string, bool) {
 	return value, true
 }
 
+func (r *Redis) FetchMulti(keys []string) map[string]string {
+	result := make(map[string]string)
+
+	items, err := r.driver.MGet(keys...).Result()
+
+	if err != nil {
+		return result
+	}
+
+	for i := 0; i < len(keys); i++ {
+		if items[i] != nil {
+			result[keys[i]] = items[i].(string)
+		}
+	}
+
+	return result
+}
+
 func (r *Redis) Contains(key string) bool {
 	status, err := r.driver.Exists(key).Result()
 
