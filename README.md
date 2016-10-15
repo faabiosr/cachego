@@ -65,6 +65,27 @@ func main() {
 }
 ```
 
+### File
+
+```go
+package main
+
+import (
+    "github.com/fabiorphp/cachego"
+)
+
+func main() {
+	s.cache = &cachego.File{
+        "/cache-dir/",
+    }
+
+    cache.Save("foo", "bar")
+
+    value := cache.Fetch("foo")
+    ...
+}
+```
+
 ## Documentation
 
 Read the full documentation at [https://godoc.org/github.com/fabiorphp/cachego](https://godoc.org/github.com/fabiorphp/cachego).
