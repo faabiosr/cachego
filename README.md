@@ -4,7 +4,7 @@
 [![Coverage Status](https://img.shields.io/coveralls/fabiorphp/cachego/master.svg?style=flat-square)](https://coveralls.io/github/fabiorphp/cachego?branch=master)
 [![GoDoc](https://img.shields.io/badge/godoc-reference-5272B4.svg?style=flat-square)](https://godoc.org/github.com/fabiorphp/cachego)
 
-This is a Golang cache component.
+Simple interface around cache drivers
 
 ## Installation
 Cachego requires Go 1.5 or later.
