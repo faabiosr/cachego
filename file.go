@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	errors "github.com/pkg/errors"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -31,13 +32,13 @@ func (f *File) createName(key string) string {
 	return filePath
 }
 
-func (f *File) read(key string) (*FileContent, bool) {
+func (f *File) read(key string) (*FileContent, error) {
 	value, err := ioutil.ReadFile(
 		f.createName(key),
 	)
 
 	if err != nil {
-		return nil, false
+		return nil, errors.Wrap(err, "Unable to open")
 	}
 
 	content := &FileContent{}
@@ -45,53 +46,65 @@ func (f *File) read(key string) (*FileContent, bool) {
 	err = json.Unmarshal(value, content)
 
 	if err != nil {
-		return nil, false
+		return nil, errors.Wrap(err, "Unable to decode json data")
 	}
 
 	if content.Duration == 0 {
-		return content, true
+		return content, nil
 	}
 
 	if content.Duration <= time.Now().Unix() {
 		f.Delete(key)
-		return nil, false
+		return nil, errors.New("Cache expired")
 	}
 
-	return content, true
+	return content, nil
 }
 
 func (f *File) Contains(key string) bool {
 
-	_, ok := f.read(key)
-
-	return ok
-}
-
-func (f *File) Delete(key string) bool {
-	err := os.Remove(
-		f.createName(key),
-	)
-
-	if err != nil {
+	if _, err := f.read(key); err != nil {
 		return false
 	}
 
 	return true
 }
 
-func (f *File) Fetch(key string) (string, bool) {
-	if content, ok := f.read(key); ok {
-		return content.Data, true
+func (f *File) Delete(key string) error {
+	_, err := os.Stat(
+		f.createName(key),
+	)
+
+	if err != nil && os.IsNotExist(err) {
+		return nil
 	}
 
-	return "", false
+	err = os.Remove(
+		f.createName(key),
+	)
+
+	if err != nil {
+		return errors.Wrap(err, "Unable to delete")
+	}
+
+	return nil
+}
+
+func (f *File) Fetch(key string) (string, error) {
+	content, err := f.read(key)
+
+	if err != nil {
+		return "", err
+	}
+
+	return content.Data, nil
 }
 
 func (f *File) FetchMulti(keys []string) map[string]string {
 	result := make(map[string]string)
 
 	for _, key := range keys {
-		if value, ok := f.Fetch(key); ok {
+		if value, err := f.Fetch(key); err == nil {
 			result[key] = value
 		}
 	}
@@ -99,11 +112,11 @@ func (f *File) FetchMulti(keys []string) map[string]string {
 	return result
 }
 
-func (f *File) Flush() bool {
+func (f *File) Flush() error {
 	dir, err := os.Open(f.dir)
 
 	if err != nil {
-		return false
+		return errors.Wrap(err, "Unable to open file")
 	}
 
 	defer dir.Close()
@@ -114,10 +127,10 @@ func (f *File) Flush() bool {
 		os.Remove(filepath.Join(f.dir, name))
 	}
 
-	return true
+	return nil
 }
 
-func (f *File) Save(key string, value string, lifeTime time.Duration) bool {
+func (f *File) Save(key string, value string, lifeTime time.Duration) error {
 
 	duration := int64(0)
 
@@ -133,12 +146,12 @@ func (f *File) Save(key string, value string, lifeTime time.Duration) bool {
 	data, err := json.Marshal(content)
 
 	if err != nil {
-		return false
+		return errors.Wrap(err, "Unable to encode json data")
 	}
 
 	if err := ioutil.WriteFile(f.createName(key), data, 0666); err != nil {
-		return false
+		return errors.Wrap(err, "Unable to save")
 	}
 
-	return true
+	return nil
 }

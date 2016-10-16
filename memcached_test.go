@@ -6,7 +6,6 @@ import (
 	"github.com/stretchr/testify/suite"
 	"net"
 	"testing"
-	"time"
 )
 
 type MemcachedTestSuite struct {
@@ -34,11 +33,11 @@ func (s *MemcachedTestSuite) TestSaveReturnFalseWhenThrowError() {
 
 	cache := &Memcached{memcached}
 
-	s.assert.False(cache.Save("foo", "bar", 10*time.Hour))
+	s.assert.Error(cache.Save("foo", "bar", 0))
 }
 
 func (s *MemcachedTestSuite) TestSave() {
-	s.assert.True(s.cache.Save("foo", "bar", 0))
+	s.assert.Nil(s.cache.Save("foo", "bar", 0))
 }
 
 func (s *MemcachedTestSuite) TestFetchReturnFalseWhenThrowError() {
@@ -50,9 +49,9 @@ func (s *MemcachedTestSuite) TestFetchReturnFalseWhenThrowError() {
 	memcached := memcache.New("127.0.0.1:22222")
 	cache := &Memcached{memcached}
 
-	result, status := cache.Fetch(key)
+	result, err := cache.Fetch(key)
 
-	s.assert.False(status)
+	s.assert.Error(err)
 	s.assert.Empty(result)
 }
 
@@ -62,9 +61,9 @@ func (s *MemcachedTestSuite) TestFetch() {
 
 	s.cache.Save(key, value, 0)
 
-	result, status := s.cache.Fetch(key)
+	result, err := s.cache.Fetch(key)
 
-	s.assert.True(status)
+	s.assert.Nil(err)
 	s.assert.Equal(value, result)
 }
 
@@ -76,13 +75,13 @@ func (s *MemcachedTestSuite) TestContains() {
 }
 
 func (s *MemcachedTestSuite) TestDeleteReturnFalseWhenThrowError() {
-	s.assert.False(s.cache.Delete("bar"))
+	s.assert.Error(s.cache.Delete("bar"))
 }
 
 func (s *MemcachedTestSuite) TestDelete() {
 	s.cache.Save("foo", "bar", 0)
 
-	s.assert.True(s.cache.Delete("foo"))
+	s.assert.Nil(s.cache.Delete("foo"))
 	s.assert.False(s.cache.Contains("foo"))
 }
 
@@ -91,13 +90,13 @@ func (s *MemcachedTestSuite) TestFlushReturnFalseWhenThrowError() {
 
 	cache := &Memcached{memcached}
 
-	s.assert.False(cache.Flush())
+	s.assert.Error(cache.Flush())
 }
 
 func (s *MemcachedTestSuite) TestFlush() {
 	s.cache.Save("foo", "bar", 0)
 
-	s.assert.True(s.cache.Flush())
+	s.assert.Nil(s.cache.Flush())
 	s.assert.False(s.cache.Contains("foo"))
 }
 

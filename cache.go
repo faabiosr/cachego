@@ -6,9 +6,9 @@ import (
 
 type Cache interface {
 	Contains(key string) bool
-	Delete(key string) bool
-	Fetch(key string) (string, bool)
+	Delete(key string) error
+	Fetch(key string) (string, error)
 	FetchMulti(keys []string) map[string]string
-	Flush() bool
-	Save(key string, value string, lifeTime time.Duration) bool
+	Flush() error
+	Save(key string, value string, lifeTime time.Duration) error
 }

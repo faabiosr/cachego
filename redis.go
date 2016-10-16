@@ -9,14 +9,14 @@ type Redis struct {
 	driver *redis.Client
 }
 
-func (r *Redis) Fetch(key string) (string, bool) {
+func (r *Redis) Fetch(key string) (string, error) {
 	value, err := r.driver.Get(key).Result()
 
 	if err != nil {
-		return "", false
+		return "", err
 	}
 
-	return value, true
+	return value, nil
 }
 
 func (r *Redis) FetchMulti(keys []string) map[string]string {
@@ -47,36 +47,14 @@ func (r *Redis) Contains(key string) bool {
 	return status
 }
 
-func (r *Redis) Save(key string, value string, lifeTime time.Duration) bool {
-	err := r.driver.Set(key, value, lifeTime).Err()
-
-	if err != nil {
-		return false
-	}
-
-	return true
+func (r *Redis) Save(key string, value string, lifeTime time.Duration) error {
+	return r.driver.Set(key, value, lifeTime).Err()
 }
 
-func (r *Redis) Delete(key string) bool {
-	status, err := r.driver.Del(key).Result()
-
-	if err != nil {
-		return false
-	}
-
-	if status > 0 {
-		return true
-	}
-
-	return false
+func (r *Redis) Delete(key string) error {
+	return r.driver.Del(key).Err()
 }
 
-func (r *Redis) Flush() bool {
-	err := r.driver.FlushAll().Err()
-
-	if err != nil {
-		return false
-	}
-
-	return true
+func (r *Redis) Flush() error {
+	return r.driver.FlushAll().Err()
 }

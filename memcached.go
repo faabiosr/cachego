@@ -10,21 +10,23 @@ type Memcached struct {
 }
 
 func (m *Memcached) Contains(key string) bool {
-	_, status := m.Fetch(key)
+	if _, err := m.Fetch(key); err != nil {
+		return false
+	}
 
-	return status
+	return true
 }
 
-func (m *Memcached) Fetch(key string) (string, bool) {
+func (m *Memcached) Fetch(key string) (string, error) {
 	item, err := m.driver.Get(key)
 
 	if err != nil {
-		return "", false
+		return "", err
 	}
 
 	value := string(item.Value[:])
 
-	return value, true
+	return value, nil
 }
 
 func (m *Memcached) FetchMulti(keys []string) map[string]string {
@@ -43,7 +45,7 @@ func (m *Memcached) FetchMulti(keys []string) map[string]string {
 	return result
 }
 
-func (m *Memcached) Save(key string, value string, lifeTime time.Duration) bool {
+func (m *Memcached) Save(key string, value string, lifeTime time.Duration) error {
 	err := m.driver.Set(
 		&memcache.Item{
 			Key:        key,
@@ -52,29 +54,13 @@ func (m *Memcached) Save(key string, value string, lifeTime time.Duration) bool 
 		},
 	)
 
-	if err != nil {
-		return false
-	}
-
-	return true
+	return err
 }
 
-func (m *Memcached) Delete(key string) bool {
-	err := m.driver.Delete(key)
-
-	if err != nil {
-		return false
-	}
-
-	return true
+func (m *Memcached) Delete(key string) error {
+	return m.driver.Delete(key)
 }
 
-func (m *Memcached) Flush() bool {
-	err := m.driver.FlushAll()
-
-	if err != nil {
-		return false
-	}
-
-	return true
+func (m *Memcached) Flush() error {
+	return m.driver.FlushAll()
 }

@@ -27,11 +27,11 @@ func (s *FileTestSuite) SetupTest() {
 func (s *FileTestSuite) TestSaveReturnFalseWhenThrowError() {
 	cache := &File{"./test/"}
 
-	s.assert.False(cache.Save("foo", "bar", 0))
+	s.assert.Regexp("^Unable to save", cache.Save("foo", "bar", 0))
 }
 
 func (s *FileTestSuite) TestSave() {
-	s.assert.True(s.cache.Save("foo", "bar", 0))
+	s.assert.Nil(s.cache.Save("foo", "bar", 0))
 }
 
 func (s *FileTestSuite) TestFetchReturnFalseWhenThrowError() {
@@ -42,9 +42,9 @@ func (s *FileTestSuite) TestFetchReturnFalseWhenThrowError() {
 
 	cache := &File{"./test/"}
 
-	result, status := cache.Fetch(key)
+	result, err := cache.Fetch(key)
 
-	s.assert.False(status)
+	s.assert.Regexp("^Unable to open", err)
 	s.assert.Empty(result)
 }
 
@@ -56,9 +56,9 @@ func (s *FileTestSuite) TestFetchReturnFalseWhenExpired() {
 
 	time.Sleep(1 * time.Second)
 
-	result, status := s.cache.Fetch(key)
+	result, err := s.cache.Fetch(key)
 
-	s.assert.False(status)
+	s.assert.EqualError(err, "Cache expired")
 	s.assert.Empty(result)
 }
 
@@ -67,9 +67,9 @@ func (s *FileTestSuite) TestFetch() {
 	value := "bar"
 
 	s.cache.Save(key, value, 0)
-	result, status := s.cache.Fetch(key)
+	result, err := s.cache.Fetch(key)
 
-	s.assert.True(status)
+	s.assert.Nil(err)
 	s.assert.Equal(value, result)
 }
 
@@ -78,9 +78,9 @@ func (s *FileTestSuite) TestFetchLongCacheDuration() {
 	value := "bar"
 
 	s.cache.Save(key, value, 10*time.Second)
-	result, status := s.cache.Fetch(key)
+	result, err := s.cache.Fetch(key)
 
-	s.assert.True(status)
+	s.assert.Nil(err)
 	s.assert.Equal(value, result)
 }
 
@@ -94,21 +94,21 @@ func (s *FileTestSuite) TestContains() {
 func (s *FileTestSuite) TestDelete() {
 	s.cache.Save("foo", "bar", 0)
 
-	s.assert.True(s.cache.Delete("foo"))
+	s.assert.Nil(s.cache.Delete("foo"))
 	s.assert.False(s.cache.Contains("foo"))
-	s.assert.False(s.cache.Delete("bar"))
+	s.assert.Nil(s.cache.Delete("bar"))
 }
 
 func (s *FileTestSuite) TestFlushReturnFalseWhenThrowError() {
 	cache := &File{"./test/"}
 
-	s.assert.False(cache.Flush())
+	s.assert.Error(cache.Flush(), "OK")
 }
 
 func (s *FileTestSuite) TestFlush() {
 	s.cache.Save("foo", "bar", 0)
 
-	s.assert.True(s.cache.Flush())
+	s.assert.Nil(s.cache.Flush())
 	s.assert.False(s.cache.Contains("foo"))
 }
 
