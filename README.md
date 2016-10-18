@@ -29,15 +29,12 @@ import (
 	"github.com/bradfitz/gomemcache/memcache"
 )
 
-func main() {
-    cache := &cachego.Memcached{
+var cache cachego.Cache
+
+func init() {
+    cache = &cachego.Memcached{
         memcached.New("localhost:11211")
     }
-
-    cache.Save("foo", "bar")
-
-    value := cache.Fetch("foo")
-    ...
 }
 ```
 
@@ -51,17 +48,14 @@ import (
 	"gopkg.in/redis.v4"
 )
 
-func main() {
-	s.cache = &cachego.Redis{
+var cache cachego.Cache
+
+func init() {
+	cache = &cachego.Redis{
 	    redis.NewClient(&redis.Options{
             Addr: ":6379",
 	    }),
     }
-
-    cache.Save("foo", "bar")
-
-    value := cache.Fetch("foo")
-    ...
 }
 ```
 
@@ -74,17 +68,93 @@ import (
     "github.com/fabiorphp/cachego"
 )
 
-func main() {
-	s.cache = &cachego.File{
+var cache cachego.Cache
+
+func init() {
+	cache = &cachego.File{
+        "/cache-dir/",
+    }
+}
+```
+
+### Map
+
+```go
+package main
+
+import (
+    "github.com/fabiorphp/cachego"
+)
+
+var cache cachego.Cache
+
+func init() {
+	cache = NewMapCache()
+}
+```
+
+### Chain
+
+```go
+package main
+
+import (
+    "github.com/fabiorphp/cachego"
+)
+
+var cache cachego.Cache
+
+func init() {
+    memacached := &cachego.Memcached{
+        memcached.New("localhost:11211")
+    }
+
+	redis := &cachego.Redis{
+	    redis.NewClient(&redis.Options{
+            Addr: ":6379",
+	    }),
+    }
+
+	file := &cachego.File{
         "/cache-dir/",
     }
 
-    cache.Save("foo", "bar")
-
-    value := cache.Fetch("foo")
-    ...
+	cache = &cachego.Chain{
+        []cachego.Cache{
+            cachego.NewMapCache(),
+            memcached,
+            redis,
+            file,
+        },
+    }
 }
 ```
+
+### Usage
+```go
+package main
+
+import (
+    "github.com/fabiorphp/cachego"
+	"github.com/bradfitz/gomemcache/memcache"
+)
+
+func main() {
+    cache.Save("foo", "bar")
+    cache.Save("john", "doe")
+
+    value, err := cache.Fetch("foo")
+
+    multiple := cache.FetchMulti([]string{"foo", "john"})
+
+    if cache.Contains("foo") {
+        cache.Delete("foo")
+    }
+
+    cache.Flush()
+}
+```
+
 
 ## Documentation
 
