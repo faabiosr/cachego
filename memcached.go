@@ -17,6 +17,10 @@ func (m *Memcached) Contains(key string) bool {
 	return true
 }
 
+func (m *Memcached) Delete(key string) error {
+	return m.driver.Delete(key)
+}
+
 func (m *Memcached) Fetch(key string) (string, error) {
 	item, err := m.driver.Get(key)
 
@@ -45,6 +49,10 @@ func (m *Memcached) FetchMulti(keys []string) map[string]string {
 	return result
 }
 
+func (m *Memcached) Flush() error {
+	return m.driver.FlushAll()
+}
+
 func (m *Memcached) Save(key string, value string, lifeTime time.Duration) error {
 	err := m.driver.Set(
 		&memcache.Item{
@@ -55,12 +63,4 @@ func (m *Memcached) Save(key string, value string, lifeTime time.Duration) error
 	)
 
 	return err
-}
-
-func (m *Memcached) Delete(key string) error {
-	return m.driver.Delete(key)
-}
-
-func (m *Memcached) Flush() error {
-	return m.driver.FlushAll()
 }

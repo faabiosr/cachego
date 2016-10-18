@@ -72,7 +72,7 @@ func (s *RedisTestSuite) TestFetch() {
 	s.assert.Equal(value, result)
 }
 
-func (s *RedisTestSuite) TestContainsReturnFalseWhenThrowError() {
+func (s *RedisTestSuite) TestContainsThrowError() {
 	redis := redis.NewClient(&redis.Options{
 		Addr: ":6380",
 	})
@@ -106,7 +106,7 @@ func (s *RedisTestSuite) TestDelete() {
 	s.assert.Nil(s.cache.Delete("foo"))
 }
 
-func (s *RedisTestSuite) TestFlushReturnFalseWhenThrowError() {
+func (s *RedisTestSuite) TestFlushThrowError() {
 	redis := redis.NewClient(&redis.Options{
 		Addr: ":6380",
 	})

@@ -28,7 +28,7 @@ func (s *MemcachedTestSuite) SetupTest() {
 	s.assert = assert.New(s.T())
 }
 
-func (s *MemcachedTestSuite) TestSaveReturnFalseWhenThrowError() {
+func (s *MemcachedTestSuite) TestSaveThrowError() {
 	memcached := memcache.New("127.0.0.1:22222")
 
 	cache := &Memcached{memcached}
@@ -40,7 +40,7 @@ func (s *MemcachedTestSuite) TestSave() {
 	s.assert.Nil(s.cache.Save("foo", "bar", 0))
 }
 
-func (s *MemcachedTestSuite) TestFetchReturnFalseWhenThrowError() {
+func (s *MemcachedTestSuite) TestFetchThrowError() {
 	key := "foo"
 	value := "bar"
 
@@ -74,7 +74,7 @@ func (s *MemcachedTestSuite) TestContains() {
 	s.assert.False(s.cache.Contains("bar"))
 }
 
-func (s *MemcachedTestSuite) TestDeleteReturnFalseWhenThrowError() {
+func (s *MemcachedTestSuite) TestDeleteThrowError() {
 	s.assert.Error(s.cache.Delete("bar"))
 }
 
@@ -85,7 +85,7 @@ func (s *MemcachedTestSuite) TestDelete() {
 	s.assert.False(s.cache.Contains("foo"))
 }
 
-func (s *MemcachedTestSuite) TestFlushReturnFalseWhenThrowError() {
+func (s *MemcachedTestSuite) TestFlushThrowError() {
 	memcached := memcache.New("127.0.0.1:22222")
 
 	cache := &Memcached{memcached}

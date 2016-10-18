@@ -24,7 +24,7 @@ func (s *FileTestSuite) SetupTest() {
 	s.assert = assert.New(s.T())
 }
 
-func (s *FileTestSuite) TestSaveReturnFalseWhenThrowError() {
+func (s *FileTestSuite) TestSaveThrowError() {
 	cache := &File{"./test/"}
 
 	s.assert.Regexp("^Unable to save", cache.Save("foo", "bar", 0))
@@ -34,7 +34,7 @@ func (s *FileTestSuite) TestSave() {
 	s.assert.Nil(s.cache.Save("foo", "bar", 0))
 }
 
-func (s *FileTestSuite) TestFetchReturnFalseWhenThrowError() {
+func (s *FileTestSuite) TestFetchThrowError() {
 	key := "foo"
 	value := "bar"
 
@@ -48,7 +48,7 @@ func (s *FileTestSuite) TestFetchReturnFalseWhenThrowError() {
 	s.assert.Empty(result)
 }
 
-func (s *FileTestSuite) TestFetchReturnFalseWhenExpired() {
+func (s *FileTestSuite) TestFetchThrowErrorWhenExpired() {
 	key := "foo"
 	value := "bar"
 
