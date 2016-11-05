@@ -93,6 +93,27 @@ func init() {
 }
 ```
 
+### MongoDB
+
+```go
+package main
+
+import (
+    "github.com/fabiorphp/cachego"
+	"gopkg.in/mgo.v2"
+)
+
+var cache cachego.Cache
+
+func init() {
+	session, _ := mgo.Dial(address)
+
+	cache = &cachego.Mongo{
+		session.DB("cache").C("cache"),
+    }
+}
+```
+
 ### Chain
 
 ```go
