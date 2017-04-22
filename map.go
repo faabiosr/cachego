@@ -5,15 +5,19 @@ import (
 	"time"
 )
 
-type MapItem struct {
-	data     string
-	duration int64
-}
+type (
+	MapItem struct {
+		data     string
+		duration int64
+	}
 
-type Map struct {
-	storage map[string]*MapItem
-}
+	// Map store the data in memory without external server
+	Map struct {
+		storage map[string]*MapItem
+	}
+)
 
+// Create an instance of Map storage
 func NewMapCache() *Map {
 	storage := make(map[string]*MapItem)
 
@@ -39,6 +43,7 @@ func (m *Map) read(key string) (*MapItem, error) {
 	return item, nil
 }
 
+// Check if cached key exists in Map storage
 func (m *Map) Contains(key string) bool {
 	if _, err := m.Fetch(key); err != nil {
 		return false
@@ -47,11 +52,13 @@ func (m *Map) Contains(key string) bool {
 	return true
 }
 
+// Delete the cached key from Map storage
 func (m *Map) Delete(key string) error {
 	delete(m.storage, key)
 	return nil
 }
 
+// Retrieve the cached value from key of the Map storage
 func (m *Map) Fetch(key string) (string, error) {
 	item, err := m.read(key)
 
@@ -62,6 +69,7 @@ func (m *Map) Fetch(key string) (string, error) {
 	return item.data, nil
 }
 
+// Retrieve multiple cached value from keys of the Map storage
 func (m *Map) FetchMulti(keys []string) map[string]string {
 	result := make(map[string]string)
 
@@ -74,11 +82,13 @@ func (m *Map) FetchMulti(keys []string) map[string]string {
 	return result
 }
 
+// Remove all cached keys in Map storage
 func (m *Map) Flush() error {
 	m.storage = make(map[string]*MapItem)
 	return nil
 }
 
+// Save a value in Map storage by key
 func (m *Map) Save(key string, value string, lifeTime time.Duration) error {
 	duration := int64(0)
 

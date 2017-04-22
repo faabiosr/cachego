@@ -5,10 +5,14 @@ import (
 	"time"
 )
 
-type Memcached struct {
-	driver *memcache.Client
-}
+type (
+	// Memcached it's a wrap around the memcached driver
+	Memcached struct {
+		driver *memcache.Client
+	}
+)
 
+// Check if cached key exists in Memcached storage
 func (m *Memcached) Contains(key string) bool {
 	if _, err := m.Fetch(key); err != nil {
 		return false
@@ -17,10 +21,12 @@ func (m *Memcached) Contains(key string) bool {
 	return true
 }
 
+// Delete the cached key from Memcached storage
 func (m *Memcached) Delete(key string) error {
 	return m.driver.Delete(key)
 }
 
+// Retrieve the cached value from key of the Memcached storage
 func (m *Memcached) Fetch(key string) (string, error) {
 	item, err := m.driver.Get(key)
 
@@ -33,6 +39,7 @@ func (m *Memcached) Fetch(key string) (string, error) {
 	return value, nil
 }
 
+// Retrieve multiple cached value from keys of the Memcached storage
 func (m *Memcached) FetchMulti(keys []string) map[string]string {
 	result := make(map[string]string)
 
@@ -49,10 +56,12 @@ func (m *Memcached) FetchMulti(keys []string) map[string]string {
 	return result
 }
 
+// Remove all cached keys in Memcached storage
 func (m *Memcached) Flush() error {
 	return m.driver.FlushAll()
 }
 
+// Save a value in Memcached storage by key
 func (m *Memcached) Save(key string, value string, lifeTime time.Duration) error {
 	err := m.driver.Set(
 		&memcache.Item{

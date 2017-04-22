@@ -5,10 +5,14 @@ import (
 	"time"
 )
 
-type Redis struct {
-	driver *redis.Client
-}
+type (
+	// Redis it's a wrap around the redis driver
+	Redis struct {
+		driver *redis.Client
+	}
+)
 
+// Check if cached key exists in Redis storage
 func (r *Redis) Contains(key string) bool {
 	status, err := r.driver.Exists(key).Result()
 
@@ -19,10 +23,12 @@ func (r *Redis) Contains(key string) bool {
 	return status
 }
 
+// Delete the cached key from Redis storage
 func (r *Redis) Delete(key string) error {
 	return r.driver.Del(key).Err()
 }
 
+// Retrieve the cached value from key of the Redis storage
 func (r *Redis) Fetch(key string) (string, error) {
 	value, err := r.driver.Get(key).Result()
 
@@ -33,6 +39,7 @@ func (r *Redis) Fetch(key string) (string, error) {
 	return value, nil
 }
 
+// Retrieve multiple cached value from keys of the Redis storage
 func (r *Redis) FetchMulti(keys []string) map[string]string {
 	result := make(map[string]string)
 
@@ -51,10 +58,12 @@ func (r *Redis) FetchMulti(keys []string) map[string]string {
 	return result
 }
 
+// Remove all cached keys in Redis storage
 func (r *Redis) Flush() error {
 	return r.driver.FlushAll().Err()
 }
 
+// Save a value in Redis storage by key
 func (r *Redis) Save(key string, value string, lifeTime time.Duration) error {
 	return r.driver.Set(key, value, lifeTime).Err()
 }

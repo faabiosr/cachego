@@ -7,16 +7,21 @@ import (
 	"time"
 )
 
-type Mongo struct {
-	collection *mgo.Collection
-}
+type (
+	// Mongo it's a wrap around the mgo driver
+	Mongo struct {
+		collection *mgo.Collection
+	}
 
-type MongoContent struct {
-	Duration int64
-	Key      string `bson:"_id"`
-	Value    string
-}
+	// MongoContent it's a bson structure of cached value
+	MongoContent struct {
+		Duration int64
+		Key      string `bson:"_id"`
+		Value    string
+	}
+)
 
+// Check if cached key exists in Mongo storage
 func (m *Mongo) Contains(key string) bool {
 	if _, err := m.Fetch(key); err != nil {
 		return false
@@ -25,10 +30,12 @@ func (m *Mongo) Contains(key string) bool {
 	return true
 }
 
+// Delete the cached key from Mongo storage
 func (m *Mongo) Delete(key string) error {
 	return m.collection.Remove(bson.M{"_id": key})
 }
 
+// Retrieve the cached value from key of the Mongo storage
 func (m *Mongo) Fetch(key string) (string, error) {
 	content := &MongoContent{}
 
@@ -50,6 +57,7 @@ func (m *Mongo) Fetch(key string) (string, error) {
 	return content.Value, nil
 }
 
+// Retrieve multiple cached value from keys of the Mongo storage
 func (m *Mongo) FetchMulti(keys []string) map[string]string {
 	result := make(map[string]string)
 
@@ -64,12 +72,14 @@ func (m *Mongo) FetchMulti(keys []string) map[string]string {
 	return result
 }
 
+// Remove all cached keys in Mongo storage
 func (m *Mongo) Flush() error {
 	_, err := m.collection.RemoveAll(bson.M{})
 
 	return err
 }
 
+// Save a value in Mongo storage by key
 func (m *Mongo) Save(key string, value string, lifeTime time.Duration) error {
 	duration := int64(0)
 

@@ -6,10 +6,14 @@ import (
 	"time"
 )
 
-type Chain struct {
-	drivers []Cache
-}
+type (
+	// Chain storage for dealing with multiple cache storage in the same time
+	Chain struct {
+		drivers []Cache
+	}
+)
 
+// Check if cached key exists in one of cache storage
 func (c *Chain) Contains(key string) bool {
 	for _, driver := range c.drivers {
 		if driver.Contains(key) {
@@ -20,6 +24,7 @@ func (c *Chain) Contains(key string) bool {
 	return false
 }
 
+// Delete the cached key in all cache storages
 func (c *Chain) Delete(key string) error {
 	for _, driver := range c.drivers {
 		if err := driver.Delete(key); err != nil {
@@ -30,6 +35,7 @@ func (c *Chain) Delete(key string) error {
 	return nil
 }
 
+// Retrieves the value of the first cache storage found
 func (c *Chain) Fetch(key string) (string, error) {
 
 	errs := []string{}
@@ -45,6 +51,7 @@ func (c *Chain) Fetch(key string) (string, error) {
 	return "", fmt.Errorf("Key not found in cache chain. Errors: %s", strings.Join(errs, ","))
 }
 
+// Retrieve multiple cached value from keys of the first cache storage found
 func (c *Chain) FetchMulti(keys []string) map[string]string {
 	result := make(map[string]string)
 
@@ -57,6 +64,7 @@ func (c *Chain) FetchMulti(keys []string) map[string]string {
 	return result
 }
 
+// Remove all cached keys of the all cache storages
 func (c *Chain) Flush() error {
 	for _, driver := range c.drivers {
 		if err := driver.Flush(); err != nil {
@@ -67,6 +75,7 @@ func (c *Chain) Flush() error {
 	return nil
 }
 
+// Save a value in all cache storages by key
 func (c *Chain) Save(key string, value string, lifeTime time.Duration) error {
 
 	for _, driver := range c.drivers {

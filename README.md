@@ -157,7 +157,7 @@ package main
 
 import (
     "github.com/fabiorphp/cachego"
-	"github.com/bradfitz/gomemcache/memcache"
+    "github.com/bradfitz/gomemcache/memcache"
 )
 
 func main() {
