@@ -7,12 +7,15 @@
 Simple interface around cache drivers
 
 ## Installation
+
 Cachego requires Go 1.5 or later.
+
 ```
 go get github.com/fabiorphp/cachego
 ```
 
-If you want to get an specific version, please use the example bellow:
+If you want to get an specific version, please use the example below:
+
 ```
 go get gopkg.in/fabiorphp/cachego.v0
 ```
@@ -26,15 +29,13 @@ package main
 
 import (
     "github.com/fabiorphp/cachego"
-	"github.com/bradfitz/gomemcache/memcache"
+    "github.com/bradfitz/gomemcache/memcache"
 )
 
 var cache cachego.Cache
 
 func init() {
-    cache = &cachego.Memcached{
-        memcached.New("localhost:11211")
-    }
+    cache = cachego.NewMemcached(memcached.New("localhost:11211"))
 }
 ```
 
@@ -45,17 +46,17 @@ package main
 
 import (
     "github.com/fabiorphp/cachego"
-	"gopkg.in/redis.v4"
+    "gopkg.in/redis.v4"
 )
 
 var cache cachego.Cache
 
 func init() {
-	cache = &cachego.Redis{
-	    redis.NewClient(&redis.Options{
+    cache = cachego.NewRedis(
+        redis.NewClient(&redis.Options{
             Addr: ":6379",
-	    }),
-    }
+        }),
+    )
 }
 ```
 
@@ -71,9 +72,9 @@ import (
 var cache cachego.Cache
 
 func init() {
-	cache = &cachego.File{
+    cache = cachego.NewFile(
         "/cache-dir/",
-    }
+    )
 }
 ```
 
@@ -89,7 +90,7 @@ import (
 var cache cachego.Cache
 
 func init() {
-	cache = NewMapCache()
+    cache = NewMap()
 }
 ```
 
@@ -100,17 +101,17 @@ package main
 
 import (
     "github.com/fabiorphp/cachego"
-	"gopkg.in/mgo.v2"
+    "gopkg.in/mgo.v2"
 )
 
 var cache cachego.Cache
 
 func init() {
-	session, _ := mgo.Dial(address)
+    session, _ := mgo.Dial(address)
 
-	cache = &cachego.Mongo{
-		session.DB("cache").C("cache"),
-    }
+    cache = cachego.NewMongo(
+        session.DB("cache").C("cache"),
+    )
 }
 ```
 
@@ -126,32 +127,31 @@ import (
 var cache cachego.Cache
 
 func init() {
-    memacached := &cachego.Memcached{
-        memcached.New("localhost:11211")
-    }
+    memcached := cachego.NewMemcached(
+        memcached.New("localhost:11211"),
+    )
 
-	redis := &cachego.Redis{
-	    redis.NewClient(&redis.Options{
+    redis := cachego.NewRedis(
+        redis.NewClient(&redis.Options{
             Addr: ":6379",
-	    }),
-    }
+        }),
+    )
 
-	file := &cachego.File{
-        "/cache-dir/",
-    }
+    file := cachego.NewFile(
+        "/cache-dir/"
+    )
 
-	cache = &cachego.Chain{
-        []cachego.Cache{
-            cachego.NewMapCache(),
-            memcached,
-            redis,
-            file,
-        },
-    }
+    cache = cachego.NewChain(
+        cachego.NewMap(),
+        memcached,
+        redis,
+        file,
+    )
 }
 ```
 
 ### Usage
+
 ```go
 package main
 
@@ -176,11 +176,10 @@ func main() {
 }
 ```
 
-
 ## Documentation
 
 Read the full documentation at [https://godoc.org/github.com/fabiorphp/cachego](https://godoc.org/github.com/fabiorphp/cachego).
 
 ## License
 
-This project is released under the MIT licence. See [LICENCE](https://github.com/fabiorphp/cachego/blob/master/LICENSE) for more details.
+This project is released under the MIT licence. See [LICENSE](https://github.com/fabiorphp/cachego/blob/master/LICENSE) for more details.
