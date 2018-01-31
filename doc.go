@@ -11,9 +11,9 @@
 //
 //    func main() {
 //
-//      cache := &cachego.Memcached{
+//      cache := cachego.NewMemcached(
 //          memcached.New("localhost:11211"),
-//      }
+//      )
 //
 //      cache.Save("foo", "bar")
 //
