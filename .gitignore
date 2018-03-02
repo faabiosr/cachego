@@ -2,3 +2,4 @@
 *.swo
 cover.*
 cache-dir/*
+vendor
