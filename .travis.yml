@@ -1,20 +1,28 @@
 language: go
 
 go:
-  - 1.5
-  - 1.6
-  - 1.7
-  - tip
+  - "1.8"
+  - "1.9"
+  - "1.10"
+  - master
 
 services:
   - memcached
   - redis-server
   - mongodb
 
+env:
+  - DEP_VERSION="0.4.1"
+
 before_install:
+  - curl -L -s https://github.com/golang/dep/releases/download/v${DEP_VERSION}/dep-linux-amd64 -o $GOPATH/bin/dep
+  - chmod +x $GOPATH/bin/dep
   - go get github.com/axw/gocov/gocov
   - go get github.com/mattn/goveralls
   - if ! go get github.com/golang/tools/cmd/cover; then go get golang.org/x/tools/cmd/cover; fi
+
+install:
+  - dep ensure
 
 script:
     - $HOME/gopath/bin/goveralls -service=travis-ci

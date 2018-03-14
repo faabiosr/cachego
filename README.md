@@ -8,7 +8,7 @@ Simple interface around cache drivers
 
 ## Installation
 
-Cachego requires Go 1.5 or later.
+Cachego requires Go 1.8 or later.
 
 ```
 go get github.com/fabiorphp/cachego
@@ -179,6 +179,28 @@ func main() {
 ## Documentation
 
 Read the full documentation at [https://godoc.org/github.com/fabiorphp/cachego](https://godoc.org/github.com/fabiorphp/cachego).
+
+## Development
+
+### Requirements
+
+- Install [docker](https://docs.docker.com/install/) and [docker-compose](https://docs.docker.com/compose/install/)
+- Install [go dep](https://github.com/golang/dep)
+
+### Run tests
+```sh
+// tests
+$ make test
+
+// test with coverage
+$ make test-coverage
+
+// clean-up
+$ make clean
+
+// configure (download dependencies and run docker containers)
+$ make configure
+```
 
 ## License
 
