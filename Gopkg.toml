@@ -45,6 +45,10 @@
   name = "gopkg.in/redis.v4"
   version = "4.2.4"
 
+[[constraint]]
+  name = "github.com/mattn/go-sqlite3"
+  version = "1.6.0"
+
 [prune]
   go-tests = true
   unused-packages = true

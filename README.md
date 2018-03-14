@@ -115,6 +115,25 @@ func init() {
 }
 ```
 
+### Sqlite3
+
+```go
+package main
+
+import (
+	"database/sql"
+	_ "github.com/mattn/go-sqlite3"
+)
+
+var cache cachego.Cache
+
+func init() {
+	db, _ := sql.Open("sqlite3", "./cache.db")
+
+	cache, _ = NewSqlite3(db, "cache")
+}
+```
+
 ### Chain
 
 ```go
