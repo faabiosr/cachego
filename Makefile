@@ -13,6 +13,6 @@ configure:
 test:
 	@go test -v .
 
-test-coverage: configure
+test-coverage:
 	@go test -coverprofile=cover.out -v .
 	@go tool cover -html=cover.out -o cover.html
