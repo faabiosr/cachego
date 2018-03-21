@@ -8,14 +8,14 @@ import (
 )
 
 type (
-	// Sqlite3 store for caching data
+	// Sqlite3 it's a wrap around the sqlite3 driver
 	Sqlite3 struct {
 		db    *sql.DB
 		table string
 	}
 )
 
-// NewSqlite3 - Create an instance of Sqlite3
+// NewSqlite3 creates an instance of Sqlite3 cache driver
 func NewSqlite3(db *sql.DB, table string) (*Sqlite3, error) {
 	if err := createTable(db, table); err != nil {
 		return nil, errors.Wrap(err, "Unable to create database table")
@@ -36,7 +36,7 @@ func createTable(db *sql.DB, table string) error {
 	return err
 }
 
-// Check if cached key exists in SQL storage
+// Contains checks if cached key exists in Sqlite3 storage
 func (s *Sqlite3) Contains(key string) bool {
 	if _, err := s.Fetch(key); err != nil {
 		return false
@@ -74,7 +74,7 @@ func (s *Sqlite3) Delete(key string) error {
 	return nil
 }
 
-// Retrieve the cached value from key of the Sqlite3 storage
+// Fetch retrieves the cached value from key of the Sqlite3 storage
 func (s *Sqlite3) Fetch(key string) (string, error) {
 	stmt, err := s.db.Prepare(
 		fmt.Sprintf("SELECT value, lifetime FROM %s WHERE key = ?", s.table),
@@ -108,7 +108,7 @@ func (s *Sqlite3) Fetch(key string) (string, error) {
 	return value, nil
 }
 
-// Retrieve multiple cached value from keys of the Sqlite3 storage
+// FetchMulti retrieves multiple cached value from keys of the Sqlite3 storage
 func (s *Sqlite3) FetchMulti(keys []string) map[string]string {
 	result := make(map[string]string)
 
@@ -121,7 +121,7 @@ func (s *Sqlite3) FetchMulti(keys []string) map[string]string {
 	return result
 }
 
-// Remove all cached keys in Sqlite3 storage
+// Flush removes all cached keys of the Sqlite3 storage
 func (s *Sqlite3) Flush() error {
 	tx, err := s.db.Begin()
 

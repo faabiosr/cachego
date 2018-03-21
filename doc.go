@@ -1,4 +1,4 @@
-// This package provide a simple way to use cache drivers.
+// Package cachego provides a simple way to use cache drivers.
 //
 // Example Usage
 //

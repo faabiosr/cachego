@@ -4,7 +4,8 @@
 
 clean:
 	@rm -fR vendor/ cover.*
-	@docker-compose rm -s -f
+	@docker-compose stop
+	@docker-compose rm -f
 
 configure:
 	@dep ensure -v
