@@ -3,8 +3,10 @@
 [![Build Status](https://img.shields.io/travis/fabiorphp/cachego/master.svg?style=flat-square)](https://travis-ci.org/fabiorphp/cachego)
 [![Coverage Status](https://img.shields.io/coveralls/fabiorphp/cachego/master.svg?style=flat-square)](https://coveralls.io/github/fabiorphp/cachego?branch=master)
 [![GoDoc](https://img.shields.io/badge/godoc-reference-5272B4.svg?style=flat-square)](https://godoc.org/github.com/fabiorphp/cachego)
+[![Go Report Card](https://goreportcard.com/badge/github.com/fabiorphp/cachego?style=flat-square)](https://goreportcard.com/report/github.com/fabiorphp/cachego)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://github.com/fabiorphp/cachego/blob/master/LICENSE)
 
-Simple interface around cache drivers
+Simple interface for caching
 
 ## Installation
 
