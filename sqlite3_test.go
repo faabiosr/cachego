@@ -20,8 +20,8 @@ type Sqlite3TestSuite struct {
 }
 
 var (
-	cacheTable string = "cache"
-	dbPath     string = "./cache.db"
+	cacheTable = "cache"
+	dbPath     = "./cache.db"
 )
 
 func (s *Sqlite3TestSuite) SetupTest() {
