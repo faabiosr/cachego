@@ -10,7 +10,7 @@ Simple interface for caching
 
 ## Installation
 
-Cachego requires Go 1.8 or later.
+Cachego requires Go 1.9 or later.
 
 ```
 go get github.com/fabiorphp/cachego
