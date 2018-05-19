@@ -136,6 +136,22 @@ func init() {
 }
 ```
 
+### SyncMap
+
+```go
+package main
+
+import (
+    "github.com/fabiorphp/cachego"
+)
+
+var cache cachego.Cache
+
+func init() {
+    cache = NewSyncMap()
+}
+```
+
 ### Chain
 
 ```go
