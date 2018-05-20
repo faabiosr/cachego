@@ -52,3 +52,7 @@
 [prune]
   go-tests = true
   unused-packages = true
+
+[[constraint]]
+  name = "github.com/coreos/bbolt"
+  version = "1.3.0"

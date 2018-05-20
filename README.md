@@ -152,6 +152,24 @@ func init() {
 }
 ```
 
+### BoltDB
+
+```go
+package main
+
+import (
+    "github.com/fabiorphp/cachego"
+    bolt "github.com/coreos/bbolt"
+)
+
+var cache cachego.Cache
+
+func init() {
+    db, _ := bolt.Open("cache.db", 0600, nil)
+    cache = NewBolt(db)
+}
+```
+
 ### Chain
 
 ```go
