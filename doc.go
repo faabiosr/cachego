@@ -5,7 +5,7 @@
 // The following is a simple example using memcached driver:
 //    import (
 //      "fmt"
-//      "github.com/fabiorphp/cachego"
+//      "github.com/faabiosr/cachego"
 //      "github.com/bradfitz/gomemcache/memcache"
 //    )
 //

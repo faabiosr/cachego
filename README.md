@@ -1,10 +1,10 @@
 # Cachego
 
-[![Build Status](https://img.shields.io/travis/fabiorphp/cachego/master.svg?style=flat-square)](https://travis-ci.org/fabiorphp/cachego)
-[![Coverage Status](https://img.shields.io/coveralls/fabiorphp/cachego/master.svg?style=flat-square)](https://coveralls.io/github/fabiorphp/cachego?branch=master)
-[![GoDoc](https://img.shields.io/badge/godoc-reference-5272B4.svg?style=flat-square)](https://godoc.org/github.com/fabiorphp/cachego)
-[![Go Report Card](https://goreportcard.com/badge/github.com/fabiorphp/cachego?style=flat-square)](https://goreportcard.com/report/github.com/fabiorphp/cachego)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://github.com/fabiorphp/cachego/blob/master/LICENSE)
+[![Build Status](https://img.shields.io/travis/faabiosr/cachego/master.svg?style=flat-square)](https://travis-ci.org/faabiosr/cachego)
+[![Coverage Status](https://img.shields.io/coveralls/faabiosr/cachego/master.svg?style=flat-square)](https://coveralls.io/github/faabiosr/cachego?branch=master)
+[![GoDoc](https://img.shields.io/badge/godoc-reference-5272B4.svg?style=flat-square)](https://godoc.org/github.com/faabiosr/cachego)
+[![Go Report Card](https://goreportcard.com/badge/github.com/faabiosr/cachego?style=flat-square)](https://goreportcard.com/report/github.com/faabiosr/cachego)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://github.com/faabiosr/cachego/blob/master/LICENSE)
 
 Simple interface for caching
 
@@ -13,13 +13,13 @@ Simple interface for caching
 Cachego requires Go 1.9 or later.
 
 ```
-go get github.com/fabiorphp/cachego
+go get github.com/faabiosr/cachego
 ```
 
 If you want to get an specific version, please use the example below:
 
 ```
-go get gopkg.in/fabiorphp/cachego.v0
+go get gopkg.in/faabiosr/cachego.v0
 ```
 
 ## Usage Examples
@@ -30,7 +30,7 @@ go get gopkg.in/fabiorphp/cachego.v0
 package main
 
 import (
-    "github.com/fabiorphp/cachego"
+    "github.com/faabiosr/cachego"
     "github.com/bradfitz/gomemcache/memcache"
 )
 
@@ -47,7 +47,7 @@ func init() {
 package main
 
 import (
-    "github.com/fabiorphp/cachego"
+    "github.com/faabiosr/cachego"
     "gopkg.in/redis.v4"
 )
 
@@ -68,7 +68,7 @@ func init() {
 package main
 
 import (
-    "github.com/fabiorphp/cachego"
+    "github.com/faabiosr/cachego"
 )
 
 var cache cachego.Cache
@@ -86,7 +86,7 @@ func init() {
 package main
 
 import (
-    "github.com/fabiorphp/cachego"
+    "github.com/faabiosr/cachego"
 )
 
 var cache cachego.Cache
@@ -102,7 +102,7 @@ func init() {
 package main
 
 import (
-    "github.com/fabiorphp/cachego"
+    "github.com/faabiosr/cachego"
     "gopkg.in/mgo.v2"
 )
 
@@ -142,7 +142,7 @@ func init() {
 package main
 
 import (
-    "github.com/fabiorphp/cachego"
+    "github.com/faabiosr/cachego"
 )
 
 var cache cachego.Cache
@@ -158,7 +158,7 @@ func init() {
 package main
 
 import (
-    "github.com/fabiorphp/cachego"
+    "github.com/faabiosr/cachego"
     bolt "github.com/coreos/bbolt"
 )
 
@@ -176,7 +176,7 @@ func init() {
 package main
 
 import (
-    "github.com/fabiorphp/cachego"
+    "github.com/faabiosr/cachego"
 )
 
 var cache cachego.Cache
@@ -211,7 +211,7 @@ func init() {
 package main
 
 import (
-    "github.com/fabiorphp/cachego"
+    "github.com/faabiosr/cachego"
     "github.com/bradfitz/gomemcache/memcache"
 )
 
@@ -233,7 +233,7 @@ func main() {
 
 ## Documentation
 
-Read the full documentation at [https://godoc.org/github.com/fabiorphp/cachego](https://godoc.org/github.com/fabiorphp/cachego).
+Read the full documentation at [https://godoc.org/github.com/faabiosr/cachego](https://godoc.org/github.com/faabiosr/cachego).
 
 ## Development
 
@@ -271,4 +271,4 @@ make test
 
 ## License
 
-This project is released under the MIT licence. See [LICENSE](https://github.com/fabiorphp/cachego/blob/master/LICENSE) for more details.
+This project is released under the MIT licence. See [LICENSE](https://github.com/faabiosr/cachego/blob/master/LICENSE) for more details.

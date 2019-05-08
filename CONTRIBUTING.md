@@ -14,9 +14,9 @@ Prerequisites:
 Clone `cachego` from source into `$GOPATH`:
 
 ```sh
-$ mkdir -p $GOPATH/src/github.com/fabiorphp
+$ mkdir -p $GOPATH/src/github.com/faabiosr
 $ cd $_
-$ git clone git@github.com:fabiorphp/cachego.git
+$ git clone git@github.com:faabiosr/cachego.git
 $ cd cachego
 ```
 
