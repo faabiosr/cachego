@@ -20,7 +20,7 @@ type (
 	// FileContent it's a structure of cached value
 	FileContent struct {
 		Duration int64  `json:"duration"`
-		Data     string `json:"data, omitempty"`
+		Data     string `json:"data,omitempty"`
 	}
 )
 

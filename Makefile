@@ -40,7 +40,8 @@ lint:
 		--enable=golint \
 		--enable=gofmt \
 		--enable=misspell \
-		--enable=vet ./...
+		--enable=vet ./... \
+		--deadline=60s
 .PHONY: lint
 
 # Run tests
