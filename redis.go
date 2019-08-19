@@ -8,12 +8,12 @@ import (
 type (
 	// Redis it's a wrap around the redis driver
 	Redis struct {
-		driver *redis.Client
+		driver redis.BaseCmdable
 	}
 )
 
 // NewRedis creates an instance of Redis cache driver
-func NewRedis(driver *redis.Client) *Redis {
+func NewRedis(driver redis.BaseCmdable) *Redis {
 	return &Redis{driver}
 }
 
