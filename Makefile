@@ -2,13 +2,8 @@
 
 # Clean up
 clean:
-	rm -fR ./vendor/ ./cover.*
+	rm -fR ./cover.*
 .PHONY: clean
-
-# Download dependencies
-configure:
-	dep ensure -v
-.PHONY: configure
 
 # Run tests and generates html coverage file
 cover: test
