@@ -5,15 +5,12 @@ import (
 	"testing"
 
 	"github.com/bradfitz/gomemcache/memcache"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 )
 
 type MemcachedTestSuite struct {
 	suite.Suite
-
-	assert *assert.Assertions
-	cache  Cache
+	cache Cache
 }
 
 func (s *MemcachedTestSuite) SetupTest() {
@@ -25,8 +22,6 @@ func (s *MemcachedTestSuite) SetupTest() {
 	}
 
 	s.cache = NewMemcached(conn)
-
-	s.assert = assert.New(s.T())
 }
 
 func (s *MemcachedTestSuite) TestSaveThrowError() {
@@ -34,11 +29,11 @@ func (s *MemcachedTestSuite) TestSaveThrowError() {
 
 	cache := NewMemcached(memcached)
 
-	s.assert.Error(cache.Save("foo", "bar", 0))
+	s.Assert().Error(cache.Save("foo", "bar", 0))
 }
 
 func (s *MemcachedTestSuite) TestSave() {
-	s.assert.Nil(s.cache.Save("foo", "bar", 0))
+	s.Assert().Nil(s.cache.Save("foo", "bar", 0))
 }
 
 func (s *MemcachedTestSuite) TestFetchThrowError() {
@@ -52,8 +47,8 @@ func (s *MemcachedTestSuite) TestFetchThrowError() {
 
 	result, err := cache.Fetch(key)
 
-	s.assert.Error(err)
-	s.assert.Empty(result)
+	s.Assert().Error(err)
+	s.Assert().Empty(result)
 }
 
 func (s *MemcachedTestSuite) TestFetch() {
@@ -64,26 +59,26 @@ func (s *MemcachedTestSuite) TestFetch() {
 
 	result, err := s.cache.Fetch(key)
 
-	s.assert.Nil(err)
-	s.assert.Equal(value, result)
+	s.Assert().Nil(err)
+	s.Assert().Equal(value, result)
 }
 
 func (s *MemcachedTestSuite) TestContains() {
 	_ = s.cache.Save("foo", "bar", 0)
 
-	s.assert.True(s.cache.Contains("foo"))
-	s.assert.False(s.cache.Contains("bar"))
+	s.Assert().True(s.cache.Contains("foo"))
+	s.Assert().False(s.cache.Contains("bar"))
 }
 
 func (s *MemcachedTestSuite) TestDeleteThrowError() {
-	s.assert.Error(s.cache.Delete("bar"))
+	s.Assert().Error(s.cache.Delete("bar"))
 }
 
 func (s *MemcachedTestSuite) TestDelete() {
 	_ = s.cache.Save("foo", "bar", 0)
 
-	s.assert.Nil(s.cache.Delete("foo"))
-	s.assert.False(s.cache.Contains("foo"))
+	s.Assert().Nil(s.cache.Delete("foo"))
+	s.Assert().False(s.cache.Contains("foo"))
 }
 
 func (s *MemcachedTestSuite) TestFlushThrowError() {
@@ -91,14 +86,14 @@ func (s *MemcachedTestSuite) TestFlushThrowError() {
 
 	cache := NewMemcached(memcached)
 
-	s.assert.Error(cache.Flush())
+	s.Assert().Error(cache.Flush())
 }
 
 func (s *MemcachedTestSuite) TestFlush() {
 	_ = s.cache.Save("foo", "bar", 0)
 
-	s.assert.Nil(s.cache.Flush())
-	s.assert.False(s.cache.Contains("foo"))
+	s.Assert().Nil(s.cache.Flush())
+	s.Assert().False(s.cache.Contains("foo"))
 }
 
 func (s *MemcachedTestSuite) TestFetchMultiReturnNoItemsWhenThrowError() {
@@ -106,7 +101,7 @@ func (s *MemcachedTestSuite) TestFetchMultiReturnNoItemsWhenThrowError() {
 
 	result := cache.FetchMulti([]string{"foo"})
 
-	s.assert.Len(result, 0)
+	s.Assert().Len(result, 0)
 }
 
 func (s *MemcachedTestSuite) TestFetchMulti() {
@@ -115,7 +110,7 @@ func (s *MemcachedTestSuite) TestFetchMulti() {
 
 	result := s.cache.FetchMulti([]string{"foo", "john"})
 
-	s.assert.Len(result, 2)
+	s.Assert().Len(result, 2)
 }
 
 func (s *MemcachedTestSuite) TestFetchMultiWhenOnlyOneOfKeysExists() {
@@ -123,7 +118,7 @@ func (s *MemcachedTestSuite) TestFetchMultiWhenOnlyOneOfKeysExists() {
 
 	result := s.cache.FetchMulti([]string{"foo", "alice"})
 
-	s.assert.Len(result, 1)
+	s.Assert().Len(result, 1)
 }
 
 func TestMemcachedRunSuite(t *testing.T) {

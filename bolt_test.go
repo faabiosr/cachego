@@ -7,14 +7,12 @@ import (
 	"time"
 
 	bolt "github.com/coreos/bbolt"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 )
 
 type BoltTestSuite struct {
 	suite.Suite
 
-	assert    *assert.Assertions
 	cache     Cache
 	db        *bolt.DB
 	directory string
@@ -33,7 +31,6 @@ func (s *BoltTestSuite) SetupTest() {
 
 	s.db = db
 	s.cache = NewBolt(s.db)
-	s.assert = assert.New(s.T())
 }
 
 func (s *BoltTestSuite) TearDownTest() {
@@ -41,7 +38,7 @@ func (s *BoltTestSuite) TearDownTest() {
 }
 
 func (s *BoltTestSuite) TestSave() {
-	s.assert.Nil(s.cache.Save("foo", "bar", 0))
+	s.Assert().Nil(s.cache.Save("foo", "bar", 0))
 }
 
 func (s *BoltTestSuite) TestSaveThrowError() {
@@ -59,8 +56,8 @@ func (s *BoltTestSuite) TestSaveThrowError() {
 	cache := NewBolt(db)
 	err = cache.Save("foo", "bar", 0)
 
-	s.assert.Error(err)
-	s.assert.Contains(err.Error(), ErrBoltSave)
+	s.Assert().Error(err)
+	s.Assert().Contains(err.Error(), ErrBoltSave)
 }
 
 func (s *BoltTestSuite) TestFetchThrowErrorWhenBucketNotFound() {
@@ -68,8 +65,8 @@ func (s *BoltTestSuite) TestFetchThrowErrorWhenBucketNotFound() {
 
 	result, err := s.cache.Fetch("foo")
 
-	s.assert.Empty(result)
-	s.assert.EqualError(err, ErrBoltBucketNotFound.Error())
+	s.Assert().Empty(result)
+	s.Assert().EqualError(err, ErrBoltBucketNotFound.Error())
 }
 
 func (s *BoltTestSuite) TestFetchThrowErrorWhenExpired() {
@@ -82,8 +79,8 @@ func (s *BoltTestSuite) TestFetchThrowErrorWhenExpired() {
 
 	result, err := s.cache.Fetch(key)
 
-	s.assert.Empty(result)
-	s.assert.EqualError(err, ErrBoltCacheExpired.Error())
+	s.Assert().Empty(result)
+	s.Assert().EqualError(err, ErrBoltCacheExpired.Error())
 }
 
 func (s *BoltTestSuite) TestFetch() {
@@ -93,8 +90,8 @@ func (s *BoltTestSuite) TestFetch() {
 	_ = s.cache.Save(key, value, 0)
 	result, err := s.cache.Fetch(key)
 
-	s.assert.Nil(err)
-	s.assert.Equal(value, result)
+	s.Assert().Nil(err)
+	s.Assert().Equal(value, result)
 }
 
 func (s *BoltTestSuite) TestFetchLongCacheDuration() {
@@ -104,15 +101,15 @@ func (s *BoltTestSuite) TestFetchLongCacheDuration() {
 	_ = s.cache.Save(key, value, 10*time.Second)
 	result, err := s.cache.Fetch(key)
 
-	s.assert.Nil(err)
-	s.assert.Equal(value, result)
+	s.Assert().Nil(err)
+	s.Assert().Equal(value, result)
 }
 
 func (s *BoltTestSuite) TestContains() {
 	_ = s.cache.Save("foo", "bar", 0)
 
-	s.assert.True(s.cache.Contains("foo"))
-	s.assert.False(s.cache.Contains("bar"))
+	s.Assert().True(s.cache.Contains("foo"))
+	s.Assert().False(s.cache.Contains("bar"))
 }
 
 func (s *BoltTestSuite) TestDeleteThrowErrorWhenBucketNotFound() {
@@ -120,36 +117,36 @@ func (s *BoltTestSuite) TestDeleteThrowErrorWhenBucketNotFound() {
 
 	err := s.cache.Delete("foo")
 
-	s.assert.EqualError(err, ErrBoltBucketNotFound.Error())
+	s.Assert().EqualError(err, ErrBoltBucketNotFound.Error())
 }
 
 func (s *BoltTestSuite) TestDelete() {
 	_ = s.cache.Save("foo", "bar", 0)
 
-	s.assert.Nil(s.cache.Delete("foo"))
-	s.assert.False(s.cache.Contains("foo"))
-	s.assert.Nil(s.cache.Delete("bar"))
+	s.Assert().Nil(s.cache.Delete("foo"))
+	s.Assert().False(s.cache.Contains("foo"))
+	s.Assert().Nil(s.cache.Delete("bar"))
 }
 
 func (s *BoltTestSuite) TestFlushThrowErrorWhenBucketNotFound() {
 	err := s.cache.Flush()
 
-	s.assert.Error(err)
-	s.assert.Contains(err.Error(), ErrBoltFlush)
+	s.Assert().Error(err)
+	s.Assert().Contains(err.Error(), ErrBoltFlush)
 }
 
 func (s *BoltTestSuite) TestFlush() {
 	_ = s.cache.Save("foo", "bar", 0)
 
-	s.assert.Nil(s.cache.Flush())
-	s.assert.False(s.cache.Contains("foo"))
+	s.Assert().Nil(s.cache.Flush())
+	s.Assert().False(s.cache.Contains("foo"))
 }
 
 func (s *BoltTestSuite) TestFetchMultiReturnNoItemsWhenThrowError() {
 	s.cache.Flush()
 	result := s.cache.FetchMulti([]string{"foo"})
 
-	s.assert.Len(result, 0)
+	s.Assert().Len(result, 0)
 }
 
 func (s *BoltTestSuite) TestFetchMulti() {
@@ -158,7 +155,7 @@ func (s *BoltTestSuite) TestFetchMulti() {
 
 	result := s.cache.FetchMulti([]string{"foo", "john"})
 
-	s.assert.Len(result, 2)
+	s.Assert().Len(result, 2)
 }
 
 func (s *BoltTestSuite) TestFetchMultiWhenOnlyOneOfKeysExists() {
@@ -166,7 +163,7 @@ func (s *BoltTestSuite) TestFetchMultiWhenOnlyOneOfKeysExists() {
 
 	result := s.cache.FetchMulti([]string{"foo", "alice"})
 
-	s.assert.Len(result, 1)
+	s.Assert().Len(result, 1)
 }
 
 func TestBoltRunSuite(t *testing.T) {

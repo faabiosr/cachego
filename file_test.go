@@ -5,15 +5,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 )
 
 type FileTestSuite struct {
 	suite.Suite
 
-	assert *assert.Assertions
-	cache  Cache
+	cache Cache
 }
 
 func (s *FileTestSuite) SetupTest() {
@@ -22,17 +20,16 @@ func (s *FileTestSuite) SetupTest() {
 	_ = os.Mkdir(directory, 0777)
 
 	s.cache = NewFile(directory)
-	s.assert = assert.New(s.T())
 }
 
 func (s *FileTestSuite) TestSaveThrowError() {
 	cache := NewFile("./test/")
 
-	s.assert.Regexp("^Unable to save", cache.Save("foo", "bar", 0))
+	s.Assert().Regexp("^Unable to save", cache.Save("foo", "bar", 0))
 }
 
 func (s *FileTestSuite) TestSave() {
-	s.assert.Nil(s.cache.Save("foo", "bar", 0))
+	s.Assert().Nil(s.cache.Save("foo", "bar", 0))
 }
 
 func (s *FileTestSuite) TestFetchThrowError() {
@@ -45,8 +42,8 @@ func (s *FileTestSuite) TestFetchThrowError() {
 
 	result, err := cache.Fetch(key)
 
-	s.assert.Regexp("^Unable to open", err)
-	s.assert.Empty(result)
+	s.Assert().Regexp("^Unable to open", err)
+	s.Assert().Empty(result)
 }
 
 func (s *FileTestSuite) TestFetchThrowErrorWhenExpired() {
@@ -59,8 +56,8 @@ func (s *FileTestSuite) TestFetchThrowErrorWhenExpired() {
 
 	result, err := s.cache.Fetch(key)
 
-	s.assert.EqualError(err, "Cache expired")
-	s.assert.Empty(result)
+	s.Assert().EqualError(err, "Cache expired")
+	s.Assert().Empty(result)
 }
 
 func (s *FileTestSuite) TestFetch() {
@@ -70,8 +67,8 @@ func (s *FileTestSuite) TestFetch() {
 	_ = s.cache.Save(key, value, 0)
 	result, err := s.cache.Fetch(key)
 
-	s.assert.Nil(err)
-	s.assert.Equal(value, result)
+	s.Assert().Nil(err)
+	s.Assert().Equal(value, result)
 }
 
 func (s *FileTestSuite) TestFetchLongCacheDuration() {
@@ -81,43 +78,43 @@ func (s *FileTestSuite) TestFetchLongCacheDuration() {
 	_ = s.cache.Save(key, value, 10*time.Second)
 	result, err := s.cache.Fetch(key)
 
-	s.assert.Nil(err)
-	s.assert.Equal(value, result)
+	s.Assert().Nil(err)
+	s.Assert().Equal(value, result)
 }
 
 func (s *FileTestSuite) TestContains() {
 	_ = s.cache.Save("foo", "bar", 0)
 
-	s.assert.True(s.cache.Contains("foo"))
-	s.assert.False(s.cache.Contains("bar"))
+	s.Assert().True(s.cache.Contains("foo"))
+	s.Assert().False(s.cache.Contains("bar"))
 }
 
 func (s *FileTestSuite) TestDelete() {
 	_ = s.cache.Save("foo", "bar", 0)
 
-	s.assert.Nil(s.cache.Delete("foo"))
-	s.assert.False(s.cache.Contains("foo"))
-	s.assert.Nil(s.cache.Delete("bar"))
+	s.Assert().Nil(s.cache.Delete("foo"))
+	s.Assert().False(s.cache.Contains("foo"))
+	s.Assert().Nil(s.cache.Delete("bar"))
 }
 
 func (s *FileTestSuite) TestFlushReturnFalseWhenThrowError() {
 	cache := NewFile("./test/")
 
-	s.assert.Error(cache.Flush(), "OK")
+	s.Assert().Error(cache.Flush(), "OK")
 }
 
 func (s *FileTestSuite) TestFlush() {
 	_ = s.cache.Save("foo", "bar", 0)
 
-	s.assert.Nil(s.cache.Flush())
-	s.assert.False(s.cache.Contains("foo"))
+	s.Assert().Nil(s.cache.Flush())
+	s.Assert().False(s.cache.Contains("foo"))
 }
 
 func (s *FileTestSuite) TestFetchMultiReturnNoItemsWhenThrowError() {
 	cache := NewFile("./test/")
 	result := cache.FetchMulti([]string{"foo"})
 
-	s.assert.Len(result, 0)
+	s.Assert().Len(result, 0)
 }
 
 func (s *FileTestSuite) TestFetchMulti() {
@@ -126,7 +123,7 @@ func (s *FileTestSuite) TestFetchMulti() {
 
 	result := s.cache.FetchMulti([]string{"foo", "john"})
 
-	s.assert.Len(result, 2)
+	s.Assert().Len(result, 2)
 }
 
 func (s *FileTestSuite) TestFetchMultiWhenOnlyOneOfKeysExists() {
@@ -134,7 +131,7 @@ func (s *FileTestSuite) TestFetchMultiWhenOnlyOneOfKeysExists() {
 
 	result := s.cache.FetchMulti([]string{"foo", "alice"})
 
-	s.assert.Len(result, 1)
+	s.Assert().Len(result, 1)
 }
 
 func TestFileRunSuite(t *testing.T) {

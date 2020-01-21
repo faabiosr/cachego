@@ -8,16 +8,14 @@ import (
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 )
 
 type Sqlite3TestSuite struct {
 	suite.Suite
 
-	assert *assert.Assertions
-	cache  Cache
-	db     *sql.DB
+	cache Cache
+	db    *sql.DB
 }
 
 var (
@@ -39,7 +37,6 @@ func (s *Sqlite3TestSuite) SetupTest() {
 		s.T().Skip()
 	}
 
-	s.assert = assert.New(s.T())
 	s.db = db
 }
 
@@ -52,23 +49,23 @@ func (s *Sqlite3TestSuite) TestCreateInstanceThrowAnError() {
 
 	_, err := NewSqlite3(s.db, cacheTable)
 
-	s.assert.Error(err)
+	s.Assert().Error(err)
 }
 
 func (s *Sqlite3TestSuite) TestSaveThrowAnError() {
 	s.db.Close()
 
-	s.assert.Error(s.cache.Save("foo", "bar", 0))
+	s.Assert().Error(s.cache.Save("foo", "bar", 0))
 }
 
 func (s *Sqlite3TestSuite) TestSaveThrowAnErrorWhenDropTable() {
 	_, _ = s.db.Exec(fmt.Sprintf("DROP TABLE %s;", cacheTable))
 
-	s.assert.Error(s.cache.Save("foo", "bar", 0))
+	s.Assert().Error(s.cache.Save("foo", "bar", 0))
 }
 
 func (s *Sqlite3TestSuite) TestSave() {
-	s.assert.Nil(s.cache.Save("foo", "bar", 0))
+	s.Assert().Nil(s.cache.Save("foo", "bar", 0))
 }
 
 func (s *Sqlite3TestSuite) TestFetchThrowAnError() {
@@ -79,8 +76,8 @@ func (s *Sqlite3TestSuite) TestFetchThrowAnError() {
 
 	result, err := s.cache.Fetch(key)
 
-	s.assert.Error(err)
-	s.assert.Empty(result)
+	s.Assert().Error(err)
+	s.Assert().Empty(result)
 }
 
 func (s *Sqlite3TestSuite) TestFetch() {
@@ -91,8 +88,8 @@ func (s *Sqlite3TestSuite) TestFetch() {
 
 	result, err := s.cache.Fetch(key)
 
-	s.assert.Nil(err)
-	s.assert.Equal(value, result)
+	s.Assert().Nil(err)
+	s.Assert().Equal(value, result)
 }
 
 func (s *Sqlite3TestSuite) TestFetchWithLongLifetime() {
@@ -103,25 +100,25 @@ func (s *Sqlite3TestSuite) TestFetchWithLongLifetime() {
 
 	result, err := s.cache.Fetch(key)
 
-	s.assert.Nil(err)
-	s.assert.Equal(value, result)
+	s.Assert().Nil(err)
+	s.Assert().Equal(value, result)
 }
 
 func (s *Sqlite3TestSuite) TestContainsThrowAnError() {
-	s.assert.False(s.cache.Contains("bar"))
+	s.Assert().False(s.cache.Contains("bar"))
 }
 
 func (s *Sqlite3TestSuite) TestContains() {
 	_ = s.cache.Save("foo", "bar", 0)
 
-	s.assert.True(s.cache.Contains("foo"))
-	s.assert.False(s.cache.Contains("bar"))
+	s.Assert().True(s.cache.Contains("foo"))
+	s.Assert().False(s.cache.Contains("bar"))
 }
 
 func (s *Sqlite3TestSuite) TestDeleteThrowAnError() {
 	s.db.Close()
 
-	s.assert.Error(
+	s.Assert().Error(
 		s.cache.Delete("cccc"),
 	)
 }
@@ -129,7 +126,7 @@ func (s *Sqlite3TestSuite) TestDeleteThrowAnError() {
 func (s *Sqlite3TestSuite) TestDeleteThrowAnErrorWhenDropTable() {
 	_, _ = s.db.Exec(fmt.Sprintf("DROP TABLE %s;", cacheTable))
 
-	s.assert.Error(
+	s.Assert().Error(
 		s.cache.Delete("cccc"),
 	)
 }
@@ -137,28 +134,28 @@ func (s *Sqlite3TestSuite) TestDeleteThrowAnErrorWhenDropTable() {
 func (s *Sqlite3TestSuite) TestDelete() {
 	_ = s.cache.Save("foo", "bar", 0)
 
-	s.assert.Nil(s.cache.Delete("foo"))
-	s.assert.False(s.cache.Contains("foo"))
-	s.assert.Nil(s.cache.Delete("foo"))
+	s.Assert().Nil(s.cache.Delete("foo"))
+	s.Assert().False(s.cache.Contains("foo"))
+	s.Assert().Nil(s.cache.Delete("foo"))
 }
 
 func (s *Sqlite3TestSuite) TestFlushThrowAnError() {
 	s.db.Close()
 
-	s.assert.Error(s.cache.Flush())
+	s.Assert().Error(s.cache.Flush())
 }
 
 func (s *Sqlite3TestSuite) TestFlushThrowAnErrorWhenDropTable() {
 	_, _ = s.db.Exec(fmt.Sprintf("DROP TABLE %s;", cacheTable))
 
-	s.assert.Error(s.cache.Flush())
+	s.Assert().Error(s.cache.Flush())
 }
 
 func (s *Sqlite3TestSuite) TestFlush() {
 	_ = s.cache.Save("foo", "bar", 0)
 
-	s.assert.Nil(s.cache.Flush())
-	s.assert.False(s.cache.Contains("foo"))
+	s.Assert().Nil(s.cache.Flush())
+	s.Assert().False(s.cache.Contains("foo"))
 }
 
 func (s *Sqlite3TestSuite) TestFetchMultiReturnNoItemsWhenThrowAnError() {
@@ -166,7 +163,7 @@ func (s *Sqlite3TestSuite) TestFetchMultiReturnNoItemsWhenThrowAnError() {
 
 	result := s.cache.FetchMulti([]string{"foo"})
 
-	s.assert.Len(result, 0)
+	s.Assert().Len(result, 0)
 }
 
 func (s *Sqlite3TestSuite) TestFetchMulti() {
@@ -175,7 +172,7 @@ func (s *Sqlite3TestSuite) TestFetchMulti() {
 
 	result := s.cache.FetchMulti([]string{"foo", "john"})
 
-	s.assert.Len(result, 2)
+	s.Assert().Len(result, 2)
 }
 
 func (s *Sqlite3TestSuite) TestFetchMultiWhenOnlyOneOfKeysExists() {
@@ -183,7 +180,7 @@ func (s *Sqlite3TestSuite) TestFetchMultiWhenOnlyOneOfKeysExists() {
 
 	result := s.cache.FetchMulti([]string{"foo", "alice"})
 
-	s.assert.Len(result, 1)
+	s.Assert().Len(result, 1)
 }
 
 func TestSqlite3RunSuite(t *testing.T) {

@@ -4,7 +4,6 @@ import (
 	"net"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"gopkg.in/redis.v4"
 )
@@ -12,8 +11,7 @@ import (
 type RedisTestSuite struct {
 	suite.Suite
 
-	assert *assert.Assertions
-	cache  Cache
+	cache Cache
 }
 
 func (s *RedisTestSuite) SetupTest() {
@@ -26,7 +24,6 @@ func (s *RedisTestSuite) SetupTest() {
 	}
 
 	s.cache = NewRedis(conn)
-	s.assert = assert.New(s.T())
 }
 
 func (s *RedisTestSuite) TestSaveThrowError() {
@@ -36,11 +33,11 @@ func (s *RedisTestSuite) TestSaveThrowError() {
 
 	cache := NewRedis(redis)
 
-	s.assert.Error(cache.Save("foo", "bar", 0))
+	s.Assert().Error(cache.Save("foo", "bar", 0))
 }
 
 func (s *RedisTestSuite) TestSave() {
-	s.assert.Nil(s.cache.Save("foo", "bar", 0))
+	s.Assert().Nil(s.cache.Save("foo", "bar", 0))
 }
 
 func (s *RedisTestSuite) TestFetchThrowError() {
@@ -57,8 +54,8 @@ func (s *RedisTestSuite) TestFetchThrowError() {
 
 	result, err := cache.Fetch(key)
 
-	s.assert.Error(err)
-	s.assert.Empty(result)
+	s.Assert().Error(err)
+	s.Assert().Empty(result)
 }
 
 func (s *RedisTestSuite) TestFetch() {
@@ -69,8 +66,8 @@ func (s *RedisTestSuite) TestFetch() {
 
 	result, err := s.cache.Fetch(key)
 
-	s.assert.Nil(err)
-	s.assert.Equal(value, result)
+	s.Assert().Nil(err)
+	s.Assert().Equal(value, result)
 }
 
 func (s *RedisTestSuite) TestContainsThrowError() {
@@ -80,14 +77,14 @@ func (s *RedisTestSuite) TestContainsThrowError() {
 
 	cache := NewRedis(redis)
 
-	s.assert.False(cache.Contains("bar"))
+	s.Assert().False(cache.Contains("bar"))
 }
 
 func (s *RedisTestSuite) TestContains() {
 	_ = s.cache.Save("foo", "bar", 0)
 
-	s.assert.True(s.cache.Contains("foo"))
-	s.assert.False(s.cache.Contains("bar"))
+	s.Assert().True(s.cache.Contains("foo"))
+	s.Assert().False(s.cache.Contains("bar"))
 }
 
 func (s *RedisTestSuite) TestDeleteThrowError() {
@@ -96,15 +93,15 @@ func (s *RedisTestSuite) TestDeleteThrowError() {
 	})
 
 	cache := NewRedis(redis)
-	s.assert.Error(cache.Delete("bar"))
+	s.Assert().Error(cache.Delete("bar"))
 }
 
 func (s *RedisTestSuite) TestDelete() {
 	_ = s.cache.Save("foo", "bar", 0)
 
-	s.assert.Nil(s.cache.Delete("foo"))
-	s.assert.False(s.cache.Contains("foo"))
-	s.assert.Nil(s.cache.Delete("foo"))
+	s.Assert().Nil(s.cache.Delete("foo"))
+	s.Assert().False(s.cache.Contains("foo"))
+	s.Assert().Nil(s.cache.Delete("foo"))
 }
 
 func (s *RedisTestSuite) TestFlushThrowError() {
@@ -114,14 +111,14 @@ func (s *RedisTestSuite) TestFlushThrowError() {
 
 	cache := NewRedis(redis)
 
-	s.assert.Error(cache.Flush())
+	s.Assert().Error(cache.Flush())
 }
 
 func (s *RedisTestSuite) TestFlush() {
 	_ = s.cache.Save("foo", "bar", 0)
 
-	s.assert.Nil(s.cache.Flush())
-	s.assert.False(s.cache.Contains("foo"))
+	s.Assert().Nil(s.cache.Flush())
+	s.Assert().False(s.cache.Contains("foo"))
 }
 
 func (s *RedisTestSuite) TestFetchMultiReturnNoItemsWhenThrowError() {
@@ -131,7 +128,7 @@ func (s *RedisTestSuite) TestFetchMultiReturnNoItemsWhenThrowError() {
 
 	result := cache.FetchMulti([]string{"foo"})
 
-	s.assert.Len(result, 0)
+	s.Assert().Len(result, 0)
 }
 
 func (s *RedisTestSuite) TestFetchMulti() {
@@ -140,7 +137,7 @@ func (s *RedisTestSuite) TestFetchMulti() {
 
 	result := s.cache.FetchMulti([]string{"foo", "john"})
 
-	s.assert.Len(result, 2)
+	s.Assert().Len(result, 2)
 }
 
 func (s *RedisTestSuite) TestFetchMultiWhenOnlyOneOfKeysExists() {
@@ -148,7 +145,7 @@ func (s *RedisTestSuite) TestFetchMultiWhenOnlyOneOfKeysExists() {
 
 	result := s.cache.FetchMulti([]string{"foo", "alice"})
 
-	s.assert.Len(result, 1)
+	s.Assert().Len(result, 1)
 }
 
 func TestRedisRunSuite(t *testing.T) {

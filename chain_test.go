@@ -5,21 +5,17 @@ import (
 	"time"
 
 	"github.com/bradfitz/gomemcache/memcache"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 )
 
 type ChainTestSuite struct {
 	suite.Suite
 
-	assert *assert.Assertions
-	cache  Cache
+	cache Cache
 }
 
 func (s *ChainTestSuite) SetupTest() {
 	s.cache = NewChain(NewMap())
-
-	s.assert = assert.New(s.T())
 }
 
 func (s *ChainTestSuite) TestSaveThrowErrorWhenOneOfDriverFail() {
@@ -28,11 +24,11 @@ func (s *ChainTestSuite) TestSaveThrowErrorWhenOneOfDriverFail() {
 		NewMemcached(memcache.New("127.0.0.1:22222")),
 	)
 
-	s.assert.Error(cache.Save("foo", "bar", 0))
+	s.Assert().Error(cache.Save("foo", "bar", 0))
 }
 
 func (s *ChainTestSuite) TestSave() {
-	s.assert.Nil(s.cache.Save("foo", "bar", 0))
+	s.Assert().Nil(s.cache.Save("foo", "bar", 0))
 }
 
 func (s *ChainTestSuite) TestFetchThrowErrorWhenExpired() {
@@ -45,8 +41,8 @@ func (s *ChainTestSuite) TestFetchThrowErrorWhenExpired() {
 
 	result, err := s.cache.Fetch(key)
 
-	s.assert.Regexp("^Key not found in cache chain", err)
-	s.assert.Empty(result)
+	s.Assert().Regexp("^Key not found in cache chain", err)
+	s.Assert().Empty(result)
 }
 
 func (s *ChainTestSuite) TestFetch() {
@@ -57,15 +53,15 @@ func (s *ChainTestSuite) TestFetch() {
 
 	result, err := s.cache.Fetch(key)
 
-	s.assert.Nil(err)
-	s.assert.Equal(value, result)
+	s.Assert().Nil(err)
+	s.Assert().Equal(value, result)
 }
 
 func (s *ChainTestSuite) TestContains() {
 	_ = s.cache.Save("foo", "bar", 0)
 
-	s.assert.True(s.cache.Contains("foo"))
-	s.assert.False(s.cache.Contains("bar"))
+	s.Assert().True(s.cache.Contains("foo"))
+	s.Assert().False(s.cache.Contains("bar"))
 }
 
 func (s *ChainTestSuite) TestDeleteThrowErrorWhenOneOfDriverFail() {
@@ -74,14 +70,14 @@ func (s *ChainTestSuite) TestDeleteThrowErrorWhenOneOfDriverFail() {
 		NewMemcached(memcache.New("127.0.0.1:22222")),
 	)
 
-	s.assert.Error(cache.Delete("foo"))
+	s.Assert().Error(cache.Delete("foo"))
 }
 
 func (s *ChainTestSuite) TestDelete() {
 	_ = s.cache.Save("foo", "bar", 0)
 
-	s.assert.Nil(s.cache.Delete("foo"))
-	s.assert.False(s.cache.Contains("foo"))
+	s.Assert().Nil(s.cache.Delete("foo"))
+	s.Assert().False(s.cache.Contains("foo"))
 }
 
 func (s *ChainTestSuite) TestFlushThrowErrorWhenOneOfDriverFail() {
@@ -90,14 +86,14 @@ func (s *ChainTestSuite) TestFlushThrowErrorWhenOneOfDriverFail() {
 		NewMemcached(memcache.New("127.0.0.1:22222")),
 	)
 
-	s.assert.Error(cache.Flush())
+	s.Assert().Error(cache.Flush())
 }
 
 func (s *ChainTestSuite) TestFlush() {
 	_ = s.cache.Save("foo", "bar", 0)
 
-	s.assert.Nil(s.cache.Flush())
-	s.assert.False(s.cache.Contains("foo"))
+	s.Assert().Nil(s.cache.Flush())
+	s.Assert().False(s.cache.Contains("foo"))
 }
 
 func (s *ChainTestSuite) TestFetchMulti() {
@@ -106,7 +102,7 @@ func (s *ChainTestSuite) TestFetchMulti() {
 
 	result := s.cache.FetchMulti([]string{"foo", "john"})
 
-	s.assert.Len(result, 2)
+	s.Assert().Len(result, 2)
 }
 
 func (s *ChainTestSuite) TestFetchMultiWhenOnlyOneOfKeysExists() {
@@ -114,7 +110,7 @@ func (s *ChainTestSuite) TestFetchMultiWhenOnlyOneOfKeysExists() {
 
 	result := s.cache.FetchMulti([]string{"foo", "alice"})
 
-	s.assert.Len(result, 1)
+	s.Assert().Len(result, 1)
 }
 
 func TestChainRunSuite(t *testing.T) {
