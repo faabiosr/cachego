@@ -1,11 +1,12 @@
 package cachego
 
 import (
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/suite"
 	"os"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 )
 
 type FileTestSuite struct {
@@ -18,7 +19,7 @@ type FileTestSuite struct {
 func (s *FileTestSuite) SetupTest() {
 	directory := "./cache-dir/"
 
-	os.Mkdir(directory, 0777)
+	_ = os.Mkdir(directory, 0777)
 
 	s.cache = NewFile(directory)
 	s.assert = assert.New(s.T())
@@ -38,7 +39,7 @@ func (s *FileTestSuite) TestFetchThrowError() {
 	key := "foo"
 	value := "bar"
 
-	s.cache.Save(key, value, 0)
+	_ = s.cache.Save(key, value, 0)
 
 	cache := NewFile("./test/")
 
@@ -52,7 +53,7 @@ func (s *FileTestSuite) TestFetchThrowErrorWhenExpired() {
 	key := "foo"
 	value := "bar"
 
-	s.cache.Save(key, value, 1*time.Second)
+	_ = s.cache.Save(key, value, 1*time.Second)
 
 	time.Sleep(1 * time.Second)
 
@@ -66,7 +67,7 @@ func (s *FileTestSuite) TestFetch() {
 	key := "foo"
 	value := "bar"
 
-	s.cache.Save(key, value, 0)
+	_ = s.cache.Save(key, value, 0)
 	result, err := s.cache.Fetch(key)
 
 	s.assert.Nil(err)
@@ -77,7 +78,7 @@ func (s *FileTestSuite) TestFetchLongCacheDuration() {
 	key := "foo"
 	value := "bar"
 
-	s.cache.Save(key, value, 10*time.Second)
+	_ = s.cache.Save(key, value, 10*time.Second)
 	result, err := s.cache.Fetch(key)
 
 	s.assert.Nil(err)
@@ -85,14 +86,14 @@ func (s *FileTestSuite) TestFetchLongCacheDuration() {
 }
 
 func (s *FileTestSuite) TestContains() {
-	s.cache.Save("foo", "bar", 0)
+	_ = s.cache.Save("foo", "bar", 0)
 
 	s.assert.True(s.cache.Contains("foo"))
 	s.assert.False(s.cache.Contains("bar"))
 }
 
 func (s *FileTestSuite) TestDelete() {
-	s.cache.Save("foo", "bar", 0)
+	_ = s.cache.Save("foo", "bar", 0)
 
 	s.assert.Nil(s.cache.Delete("foo"))
 	s.assert.False(s.cache.Contains("foo"))
@@ -106,7 +107,7 @@ func (s *FileTestSuite) TestFlushReturnFalseWhenThrowError() {
 }
 
 func (s *FileTestSuite) TestFlush() {
-	s.cache.Save("foo", "bar", 0)
+	_ = s.cache.Save("foo", "bar", 0)
 
 	s.assert.Nil(s.cache.Flush())
 	s.assert.False(s.cache.Contains("foo"))
@@ -120,8 +121,8 @@ func (s *FileTestSuite) TestFetchMultiReturnNoItemsWhenThrowError() {
 }
 
 func (s *FileTestSuite) TestFetchMulti() {
-	s.cache.Save("foo", "bar", 0)
-	s.cache.Save("john", "doe", 0)
+	_ = s.cache.Save("foo", "bar", 0)
+	_ = s.cache.Save("john", "doe", 0)
 
 	result := s.cache.FetchMulti([]string{"foo", "john"})
 
@@ -129,7 +130,7 @@ func (s *FileTestSuite) TestFetchMulti() {
 }
 
 func (s *FileTestSuite) TestFetchMultiWhenOnlyOneOfKeysExists() {
-	s.cache.Save("foo", "bar", 0)
+	_ = s.cache.Save("foo", "bar", 0)
 
 	result := s.cache.FetchMulti([]string{"foo", "alice"})
 

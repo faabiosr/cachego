@@ -3,8 +3,9 @@ package cachego
 import (
 	"database/sql"
 	"fmt"
-	errors "github.com/pkg/errors"
 	"time"
+
+	errors "github.com/pkg/errors"
 )
 
 type (
@@ -69,7 +70,7 @@ func (s *Sqlite3) Delete(key string) error {
 		return errors.Wrap(err, "Unable to delete")
 	}
 
-	tx.Commit()
+	_ = tx.Commit()
 
 	return nil
 }
@@ -100,7 +101,7 @@ func (s *Sqlite3) Fetch(key string) (string, error) {
 	}
 
 	if lifetime <= time.Now().Unix() {
-		s.Delete(key)
+		_ = s.Delete(key)
 
 		return "", errors.New("Cache expired")
 	}
@@ -145,7 +146,7 @@ func (s *Sqlite3) Flush() error {
 		return errors.Wrap(err, "Unable to flush")
 	}
 
-	tx.Commit()
+	_ = tx.Commit()
 
 	return nil
 }
@@ -180,7 +181,7 @@ func (s *Sqlite3) Save(key string, value string, lifeTime time.Duration) error {
 		return errors.Wrap(err, "Unable to save")
 	}
 
-	tx.Commit()
+	_ = tx.Commit()
 
 	return nil
 }

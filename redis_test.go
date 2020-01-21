@@ -1,11 +1,12 @@
 package cachego
 
 import (
+	"net"
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"gopkg.in/redis.v4"
-	"net"
-	"testing"
 )
 
 type RedisTestSuite struct {
@@ -46,7 +47,7 @@ func (s *RedisTestSuite) TestFetchThrowError() {
 	key := "foo"
 	value := "bar"
 
-	s.cache.Save(key, value, 0)
+	_ = s.cache.Save(key, value, 0)
 
 	redis := redis.NewClient(&redis.Options{
 		Addr: ":6380",
@@ -64,7 +65,7 @@ func (s *RedisTestSuite) TestFetch() {
 	key := "foo"
 	value := "bar"
 
-	s.cache.Save(key, value, 0)
+	_ = s.cache.Save(key, value, 0)
 
 	result, err := s.cache.Fetch(key)
 
@@ -83,7 +84,7 @@ func (s *RedisTestSuite) TestContainsThrowError() {
 }
 
 func (s *RedisTestSuite) TestContains() {
-	s.cache.Save("foo", "bar", 0)
+	_ = s.cache.Save("foo", "bar", 0)
 
 	s.assert.True(s.cache.Contains("foo"))
 	s.assert.False(s.cache.Contains("bar"))
@@ -99,7 +100,7 @@ func (s *RedisTestSuite) TestDeleteThrowError() {
 }
 
 func (s *RedisTestSuite) TestDelete() {
-	s.cache.Save("foo", "bar", 0)
+	_ = s.cache.Save("foo", "bar", 0)
 
 	s.assert.Nil(s.cache.Delete("foo"))
 	s.assert.False(s.cache.Contains("foo"))
@@ -117,7 +118,7 @@ func (s *RedisTestSuite) TestFlushThrowError() {
 }
 
 func (s *RedisTestSuite) TestFlush() {
-	s.cache.Save("foo", "bar", 0)
+	_ = s.cache.Save("foo", "bar", 0)
 
 	s.assert.Nil(s.cache.Flush())
 	s.assert.False(s.cache.Contains("foo"))
@@ -134,8 +135,8 @@ func (s *RedisTestSuite) TestFetchMultiReturnNoItemsWhenThrowError() {
 }
 
 func (s *RedisTestSuite) TestFetchMulti() {
-	s.cache.Save("foo", "bar", 0)
-	s.cache.Save("john", "doe", 0)
+	_ = s.cache.Save("foo", "bar", 0)
+	_ = s.cache.Save("john", "doe", 0)
 
 	result := s.cache.FetchMulti([]string{"foo", "john"})
 
@@ -143,7 +144,7 @@ func (s *RedisTestSuite) TestFetchMulti() {
 }
 
 func (s *RedisTestSuite) TestFetchMultiWhenOnlyOneOfKeysExists() {
-	s.cache.Save("foo", "bar", 0)
+	_ = s.cache.Save("foo", "bar", 0)
 
 	result := s.cache.FetchMulti([]string{"foo", "alice"})
 

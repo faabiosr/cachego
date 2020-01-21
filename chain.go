@@ -48,7 +48,7 @@ func (c *Chain) Fetch(key string) (string, error) {
 	for _, driver := range c.drivers {
 		value, err := driver.Fetch(key)
 
-		if driver.Fetch(key); err == nil {
+		if err == nil {
 			return value, nil
 		}
 

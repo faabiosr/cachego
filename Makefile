@@ -10,13 +10,6 @@ cover: test
 	go tool cover -html=./cover.out -o ./cover.html
 .PHONY: cover
 
-# Download dependencies
-depend:
-	go get -u gopkg.in/alecthomas/gometalinter.v2
-	gometalinter.v2 --install
-	go get -u github.com/golang/dep/...
-.PHONY: depend
-
 # Up the docker container for testing
 docker:
 	docker-compose up -d
@@ -29,14 +22,7 @@ fmt:
 
 # Run linters
 lint:
-	gometalinter.v2 \
-		--vendor \
-		--disable-all \
-		--enable=golint \
-		--enable=gofmt \
-		--enable=misspell \
-		--enable=vet ./... \
-		--deadline=60s
+	golangci-linter run ./...
 .PHONY: lint
 
 # Run tests

@@ -2,12 +2,13 @@ package cachego
 
 import (
 	"fmt"
-	bolt "github.com/coreos/bbolt"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/suite"
 	"os"
 	"testing"
 	"time"
+
+	bolt "github.com/coreos/bbolt"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 )
 
 type BoltTestSuite struct {
@@ -22,7 +23,7 @@ type BoltTestSuite struct {
 func (s *BoltTestSuite) SetupTest() {
 	s.directory = "./cache-dir/"
 
-	os.Mkdir(s.directory, 0777)
+	_ = os.Mkdir(s.directory, 0777)
 
 	db, err := bolt.Open(s.directory+"cachego.db", 0600, nil)
 
@@ -75,7 +76,7 @@ func (s *BoltTestSuite) TestFetchThrowErrorWhenExpired() {
 	key := "foo"
 	value := "bar"
 
-	s.cache.Save(key, value, 1*time.Second)
+	_ = s.cache.Save(key, value, 1*time.Second)
 
 	time.Sleep(1 * time.Second)
 
@@ -89,7 +90,7 @@ func (s *BoltTestSuite) TestFetch() {
 	key := "foo"
 	value := "bar"
 
-	s.cache.Save(key, value, 0)
+	_ = s.cache.Save(key, value, 0)
 	result, err := s.cache.Fetch(key)
 
 	s.assert.Nil(err)
@@ -100,7 +101,7 @@ func (s *BoltTestSuite) TestFetchLongCacheDuration() {
 	key := "foo"
 	value := "bar"
 
-	s.cache.Save(key, value, 10*time.Second)
+	_ = s.cache.Save(key, value, 10*time.Second)
 	result, err := s.cache.Fetch(key)
 
 	s.assert.Nil(err)
@@ -108,7 +109,7 @@ func (s *BoltTestSuite) TestFetchLongCacheDuration() {
 }
 
 func (s *BoltTestSuite) TestContains() {
-	s.cache.Save("foo", "bar", 0)
+	_ = s.cache.Save("foo", "bar", 0)
 
 	s.assert.True(s.cache.Contains("foo"))
 	s.assert.False(s.cache.Contains("bar"))
@@ -123,7 +124,7 @@ func (s *BoltTestSuite) TestDeleteThrowErrorWhenBucketNotFound() {
 }
 
 func (s *BoltTestSuite) TestDelete() {
-	s.cache.Save("foo", "bar", 0)
+	_ = s.cache.Save("foo", "bar", 0)
 
 	s.assert.Nil(s.cache.Delete("foo"))
 	s.assert.False(s.cache.Contains("foo"))
@@ -138,7 +139,7 @@ func (s *BoltTestSuite) TestFlushThrowErrorWhenBucketNotFound() {
 }
 
 func (s *BoltTestSuite) TestFlush() {
-	s.cache.Save("foo", "bar", 0)
+	_ = s.cache.Save("foo", "bar", 0)
 
 	s.assert.Nil(s.cache.Flush())
 	s.assert.False(s.cache.Contains("foo"))
@@ -152,8 +153,8 @@ func (s *BoltTestSuite) TestFetchMultiReturnNoItemsWhenThrowError() {
 }
 
 func (s *BoltTestSuite) TestFetchMulti() {
-	s.cache.Save("foo", "bar", 0)
-	s.cache.Save("john", "doe", 0)
+	_ = s.cache.Save("foo", "bar", 0)
+	_ = s.cache.Save("john", "doe", 0)
 
 	result := s.cache.FetchMulti([]string{"foo", "john"})
 
@@ -161,7 +162,7 @@ func (s *BoltTestSuite) TestFetchMulti() {
 }
 
 func (s *BoltTestSuite) TestFetchMultiWhenOnlyOneOfKeysExists() {
-	s.cache.Save("foo", "bar", 0)
+	_ = s.cache.Save("foo", "bar", 0)
 
 	result := s.cache.FetchMulti([]string{"foo", "alice"})
 

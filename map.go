@@ -37,7 +37,7 @@ func (m *Map) read(key string) (*MapItem, error) {
 	}
 
 	if item.duration <= time.Now().Unix() {
-		m.Delete(key)
+		_ = m.Delete(key)
 		return nil, errors.New("Cache expired")
 	}
 

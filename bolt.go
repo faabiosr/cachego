@@ -2,9 +2,10 @@ package cachego
 
 import (
 	"encoding/json"
+	"time"
+
 	bolt "github.com/coreos/bbolt"
 	errors "github.com/pkg/errors"
-	"time"
 )
 
 var (
@@ -76,7 +77,7 @@ func (b *Bolt) read(key string) (*BoltContent, error) {
 	}
 
 	if content.Duration <= time.Now().Unix() {
-		b.Delete(key)
+		_ = b.Delete(key)
 		return nil, ErrBoltCacheExpired
 	}
 
@@ -101,9 +102,7 @@ func (b *Bolt) Delete(key string) error {
 			return ErrBoltBucketNotFound
 		}
 
-		bucket.Delete([]byte(key))
-
-		return nil
+		return bucket.Delete([]byte(key))
 	})
 
 	return err

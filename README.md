@@ -247,14 +247,8 @@ Read the full documentation at [https://godoc.org/github.com/faabiosr/cachego](h
 // Clean up
 $ make clean
 
-// Creates folders and download dependencies
-$ make configure
-
 //Run tests and generates html coverage file
 make cover
-
-// Download project dependencies
-make depend
 
 // Up the docker containers for testing
 make docker

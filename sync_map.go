@@ -38,7 +38,7 @@ func (sm *SyncMap) read(key string) (*SyncMapItem, error) {
 	}
 
 	if item.duration <= time.Now().Unix() {
-		sm.Delete(key)
+		_ = sm.Delete(key)
 		return nil, errors.New("Cache expired")
 	}
 

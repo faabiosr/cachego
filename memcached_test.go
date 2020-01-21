@@ -1,11 +1,12 @@
 package cachego
 
 import (
+	"net"
+	"testing"
+
 	"github.com/bradfitz/gomemcache/memcache"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"net"
-	"testing"
 )
 
 type MemcachedTestSuite struct {
@@ -44,7 +45,7 @@ func (s *MemcachedTestSuite) TestFetchThrowError() {
 	key := "foo"
 	value := "bar"
 
-	s.cache.Save(key, value, 0)
+	_ = s.cache.Save(key, value, 0)
 
 	memcached := memcache.New("127.0.0.1:22222")
 	cache := NewMemcached(memcached)
@@ -59,7 +60,7 @@ func (s *MemcachedTestSuite) TestFetch() {
 	key := "foo"
 	value := "bar"
 
-	s.cache.Save(key, value, 0)
+	_ = s.cache.Save(key, value, 0)
 
 	result, err := s.cache.Fetch(key)
 
@@ -68,7 +69,7 @@ func (s *MemcachedTestSuite) TestFetch() {
 }
 
 func (s *MemcachedTestSuite) TestContains() {
-	s.cache.Save("foo", "bar", 0)
+	_ = s.cache.Save("foo", "bar", 0)
 
 	s.assert.True(s.cache.Contains("foo"))
 	s.assert.False(s.cache.Contains("bar"))
@@ -79,7 +80,7 @@ func (s *MemcachedTestSuite) TestDeleteThrowError() {
 }
 
 func (s *MemcachedTestSuite) TestDelete() {
-	s.cache.Save("foo", "bar", 0)
+	_ = s.cache.Save("foo", "bar", 0)
 
 	s.assert.Nil(s.cache.Delete("foo"))
 	s.assert.False(s.cache.Contains("foo"))
@@ -94,7 +95,7 @@ func (s *MemcachedTestSuite) TestFlushThrowError() {
 }
 
 func (s *MemcachedTestSuite) TestFlush() {
-	s.cache.Save("foo", "bar", 0)
+	_ = s.cache.Save("foo", "bar", 0)
 
 	s.assert.Nil(s.cache.Flush())
 	s.assert.False(s.cache.Contains("foo"))
@@ -109,8 +110,8 @@ func (s *MemcachedTestSuite) TestFetchMultiReturnNoItemsWhenThrowError() {
 }
 
 func (s *MemcachedTestSuite) TestFetchMulti() {
-	s.cache.Save("foo", "bar", 0)
-	s.cache.Save("john", "doe", 0)
+	_ = s.cache.Save("foo", "bar", 0)
+	_ = s.cache.Save("john", "doe", 0)
 
 	result := s.cache.FetchMulti([]string{"foo", "john"})
 
@@ -118,7 +119,7 @@ func (s *MemcachedTestSuite) TestFetchMulti() {
 }
 
 func (s *MemcachedTestSuite) TestFetchMultiWhenOnlyOneOfKeysExists() {
-	s.cache.Save("foo", "bar", 0)
+	_ = s.cache.Save("foo", "bar", 0)
 
 	result := s.cache.FetchMulti([]string{"foo", "alice"})
 

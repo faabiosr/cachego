@@ -4,11 +4,12 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
-	errors "github.com/pkg/errors"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"time"
+
+	errors "github.com/pkg/errors"
 )
 
 type (
@@ -31,7 +32,7 @@ func NewFile(dir string) *File {
 
 func (f *File) createName(key string) string {
 	h := sha256.New()
-	h.Write([]byte(key))
+	_, _ = h.Write([]byte(key))
 	hash := hex.EncodeToString(h.Sum(nil))
 
 	filename := hash + ".cachego"
@@ -63,7 +64,7 @@ func (f *File) read(key string) (*FileContent, error) {
 	}
 
 	if content.Duration <= time.Now().Unix() {
-		f.Delete(key)
+		_ = f.Delete(key)
 		return nil, errors.New("Cache expired")
 	}
 

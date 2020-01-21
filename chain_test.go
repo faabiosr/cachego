@@ -1,11 +1,12 @@
 package cachego
 
 import (
+	"testing"
+	"time"
+
 	"github.com/bradfitz/gomemcache/memcache"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"testing"
-	"time"
 )
 
 type ChainTestSuite struct {
@@ -38,7 +39,7 @@ func (s *ChainTestSuite) TestFetchThrowErrorWhenExpired() {
 	key := "foo"
 	value := "bar"
 
-	s.cache.Save(key, value, 1*time.Second)
+	_ = s.cache.Save(key, value, 1*time.Second)
 
 	time.Sleep(1 * time.Second)
 
@@ -52,7 +53,7 @@ func (s *ChainTestSuite) TestFetch() {
 	key := "foo"
 	value := "bar"
 
-	s.cache.Save(key, value, 0)
+	_ = s.cache.Save(key, value, 0)
 
 	result, err := s.cache.Fetch(key)
 
@@ -61,7 +62,7 @@ func (s *ChainTestSuite) TestFetch() {
 }
 
 func (s *ChainTestSuite) TestContains() {
-	s.cache.Save("foo", "bar", 0)
+	_ = s.cache.Save("foo", "bar", 0)
 
 	s.assert.True(s.cache.Contains("foo"))
 	s.assert.False(s.cache.Contains("bar"))
@@ -77,7 +78,7 @@ func (s *ChainTestSuite) TestDeleteThrowErrorWhenOneOfDriverFail() {
 }
 
 func (s *ChainTestSuite) TestDelete() {
-	s.cache.Save("foo", "bar", 0)
+	_ = s.cache.Save("foo", "bar", 0)
 
 	s.assert.Nil(s.cache.Delete("foo"))
 	s.assert.False(s.cache.Contains("foo"))
@@ -93,15 +94,15 @@ func (s *ChainTestSuite) TestFlushThrowErrorWhenOneOfDriverFail() {
 }
 
 func (s *ChainTestSuite) TestFlush() {
-	s.cache.Save("foo", "bar", 0)
+	_ = s.cache.Save("foo", "bar", 0)
 
 	s.assert.Nil(s.cache.Flush())
 	s.assert.False(s.cache.Contains("foo"))
 }
 
 func (s *ChainTestSuite) TestFetchMulti() {
-	s.cache.Save("foo", "bar", 0)
-	s.cache.Save("john", "doe", 0)
+	_ = s.cache.Save("foo", "bar", 0)
+	_ = s.cache.Save("john", "doe", 0)
 
 	result := s.cache.FetchMulti([]string{"foo", "john"})
 
@@ -109,7 +110,7 @@ func (s *ChainTestSuite) TestFetchMulti() {
 }
 
 func (s *ChainTestSuite) TestFetchMultiWhenOnlyOneOfKeysExists() {
-	s.cache.Save("foo", "bar", 0)
+	_ = s.cache.Save("foo", "bar", 0)
 
 	result := s.cache.FetchMulti([]string{"foo", "alice"})
 

@@ -1,8 +1,7 @@
 language: go
 
 go:
-  - "1.9"
-  - "1.10"
+  - "1.13.x"
   - master
 
 services:
@@ -11,14 +10,11 @@ services:
   - mongodb
 
 before_install:
+  - curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.23.1
   - go get github.com/axw/gocov/gocov
   - go get github.com/mattn/goveralls
   - if ! go get github.com/golang/tools/cmd/cover; then go get golang.org/x/tools/cmd/cover; fi
 
-install:
-  - make depend
-  - make configure
-
 script:
-  - make lint
+  - $GOPATH/bin/golangci-lint run ./...
   - $HOME/gopath/bin/goveralls -service=travis-ci

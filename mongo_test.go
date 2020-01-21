@@ -1,20 +1,20 @@
 package cachego
 
 import (
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/suite"
-	"gopkg.in/mgo.v2"
 	"net"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
+	"gopkg.in/mgo.v2"
 )
 
 type MongoTestSuite struct {
 	suite.Suite
 
-	assert  *assert.Assertions
-	cache   Cache
-	session *mgo.Session
+	assert *assert.Assertions
+	cache  Cache
 }
 
 func (s *MongoTestSuite) SetupTest() {
@@ -50,7 +50,7 @@ func (s *MongoTestSuite) TestFetchThrowErrorWhenExpired() {
 	key := "foo"
 	value := "bar"
 
-	s.cache.Save(key, value, 1*time.Second)
+	_ = s.cache.Save(key, value, 1*time.Second)
 
 	time.Sleep(1 * time.Second)
 
@@ -64,7 +64,7 @@ func (s *MongoTestSuite) TestFetch() {
 	key := "foo"
 	value := "bar"
 
-	s.cache.Save(key, value, 0)
+	_ = s.cache.Save(key, value, 0)
 
 	result, err := s.cache.Fetch(key)
 
@@ -76,7 +76,7 @@ func (s *MongoTestSuite) TestFetchLongCacheDuration() {
 	key := "foo"
 	value := "bar"
 
-	s.cache.Save(key, value, 10*time.Second)
+	_ = s.cache.Save(key, value, 10*time.Second)
 	result, err := s.cache.Fetch(key)
 
 	s.assert.Nil(err)
@@ -84,7 +84,7 @@ func (s *MongoTestSuite) TestFetchLongCacheDuration() {
 }
 
 func (s *MongoTestSuite) TestContains() {
-	s.cache.Save("foo", "bar", 0)
+	_ = s.cache.Save("foo", "bar", 0)
 
 	s.assert.True(s.cache.Contains("foo"))
 	s.assert.False(s.cache.Contains("bar"))
@@ -95,22 +95,22 @@ func (s *MongoTestSuite) TestDeleteThrowError() {
 }
 
 func (s *MongoTestSuite) TestDelete() {
-	s.cache.Save("foo", "bar", 0)
+	_ = s.cache.Save("foo", "bar", 0)
 
 	s.assert.Nil(s.cache.Delete("foo"))
 	s.assert.False(s.cache.Contains("foo"))
 }
 
 func (s *MongoTestSuite) TestFlush() {
-	s.cache.Save("foo", "bar", 0)
+	_ = s.cache.Save("foo", "bar", 0)
 
 	s.assert.Nil(s.cache.Flush())
 	s.assert.False(s.cache.Contains("foo"))
 }
 
 func (s *MongoTestSuite) TestFetchMulti() {
-	s.cache.Save("foo", "bar", 0)
-	s.cache.Save("john", "doe", 0)
+	_ = s.cache.Save("foo", "bar", 0)
+	_ = s.cache.Save("john", "doe", 0)
 
 	result := s.cache.FetchMulti([]string{"foo", "john"})
 
@@ -118,7 +118,7 @@ func (s *MongoTestSuite) TestFetchMulti() {
 }
 
 func (s *MongoTestSuite) TestFetchMultiWhenOnlyOneOfKeysExists() {
-	s.cache.Save("foo", "bar", 0)
+	_ = s.cache.Save("foo", "bar", 0)
 
 	result := s.cache.FetchMulti([]string{"foo", "alice"})
 
