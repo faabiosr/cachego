@@ -1,5 +1,4 @@
 *.swp
 *.swo
-cover.*
+cover*
 cache-dir/*
-vendor

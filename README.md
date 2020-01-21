@@ -1,7 +1,7 @@
 # Cachego
 
 [![Build Status](https://img.shields.io/travis/faabiosr/cachego/master.svg?style=flat-square)](https://travis-ci.org/faabiosr/cachego)
-[![Coverage Status](https://img.shields.io/coveralls/faabiosr/cachego/master.svg?style=flat-square)](https://coveralls.io/github/faabiosr/cachego?branch=master)
+[![Codecov branch](https://img.shields.io/codecov/c/github/faabiosr/cachego/master.svg?style=flat-square)](https://codecov.io/gh/faabiosr/cachego)
 [![GoDoc](https://img.shields.io/badge/godoc-reference-5272B4.svg?style=flat-square)](https://godoc.org/github.com/faabiosr/cachego)
 [![Go Report Card](https://goreportcard.com/badge/github.com/faabiosr/cachego?style=flat-square)](https://goreportcard.com/report/github.com/faabiosr/cachego)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://github.com/faabiosr/cachego/blob/master/LICENSE)
