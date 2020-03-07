@@ -23,7 +23,7 @@ fmt:
 
 # Run linters
 lint:
-	@golangci-linter run ./...
+	@golangci-lint run ./...
 .PHONY: lint
 
 # Run tests

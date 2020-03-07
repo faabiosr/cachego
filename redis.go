@@ -1,8 +1,9 @@
 package cachego
 
 import (
-	"gopkg.in/redis.v4"
 	"time"
+
+	"gopkg.in/redis.v4"
 )
 
 type (
