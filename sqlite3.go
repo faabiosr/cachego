@@ -7,8 +7,7 @@ import (
 )
 
 type (
-	// Sqlite3 it's a wrap around the sqlite3 driver
-	Sqlite3 struct {
+	sqlite3 struct {
 		db    *sql.DB
 		table string
 	}
@@ -20,7 +19,7 @@ func NewSqlite3(db *sql.DB, table string) (Cache, error) {
 		return nil, err
 	}
 
-	return &Sqlite3{db, table}, nil
+	return &sqlite3{db, table}, nil
 }
 
 func createTable(db *sql.DB, table string) error {
@@ -36,7 +35,7 @@ func createTable(db *sql.DB, table string) error {
 }
 
 // Contains checks if cached key exists in Sqlite3 storage
-func (s *Sqlite3) Contains(key string) bool {
+func (s *sqlite3) Contains(key string) bool {
 	if _, err := s.Fetch(key); err != nil {
 		return false
 	}
@@ -45,7 +44,7 @@ func (s *Sqlite3) Contains(key string) bool {
 }
 
 // Delete the cached key from Sqlite3 storage
-func (s *Sqlite3) Delete(key string) error {
+func (s *sqlite3) Delete(key string) error {
 	tx, err := s.db.Begin()
 
 	if err != nil {
@@ -74,7 +73,7 @@ func (s *Sqlite3) Delete(key string) error {
 }
 
 // Fetch retrieves the cached value from key of the Sqlite3 storage
-func (s *Sqlite3) Fetch(key string) (string, error) {
+func (s *sqlite3) Fetch(key string) (string, error) {
 	stmt, err := s.db.Prepare(
 		fmt.Sprintf("SELECT value, lifetime FROM %s WHERE key = ?", s.table),
 	)
@@ -108,7 +107,7 @@ func (s *Sqlite3) Fetch(key string) (string, error) {
 }
 
 // FetchMulti retrieves multiple cached value from keys of the Sqlite3 storage
-func (s *Sqlite3) FetchMulti(keys []string) map[string]string {
+func (s *sqlite3) FetchMulti(keys []string) map[string]string {
 	result := make(map[string]string)
 
 	for _, key := range keys {
@@ -121,7 +120,7 @@ func (s *Sqlite3) FetchMulti(keys []string) map[string]string {
 }
 
 // Flush removes all cached keys of the Sqlite3 storage
-func (s *Sqlite3) Flush() error {
+func (s *sqlite3) Flush() error {
 	tx, err := s.db.Begin()
 
 	if err != nil {
@@ -150,7 +149,7 @@ func (s *Sqlite3) Flush() error {
 }
 
 // Save a value in Sqlite3 storage by key
-func (s *Sqlite3) Save(key string, value string, lifeTime time.Duration) error {
+func (s *sqlite3) Save(key string, value string, lifeTime time.Duration) error {
 	duration := int64(0)
 
 	if lifeTime > 0 {

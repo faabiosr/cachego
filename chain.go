@@ -7,19 +7,18 @@ import (
 )
 
 type (
-	// Chain storage for dealing with multiple cache storage in the same time
-	Chain struct {
+	chain struct {
 		drivers []Cache
 	}
 )
 
 // NewChain creates an instance of Chain cache driver
 func NewChain(drivers ...Cache) Cache {
-	return &Chain{drivers}
+	return &chain{drivers}
 }
 
 // Contains checks if the cached key exists in one of the cache storages
-func (c *Chain) Contains(key string) bool {
+func (c *chain) Contains(key string) bool {
 	for _, driver := range c.drivers {
 		if driver.Contains(key) {
 			return true
@@ -30,7 +29,7 @@ func (c *Chain) Contains(key string) bool {
 }
 
 // Delete the cached key in all cache storages
-func (c *Chain) Delete(key string) error {
+func (c *chain) Delete(key string) error {
 	for _, driver := range c.drivers {
 		if err := driver.Delete(key); err != nil {
 			return err
@@ -41,7 +40,7 @@ func (c *Chain) Delete(key string) error {
 }
 
 // Fetch retrieves the value of one of the registred cache storages
-func (c *Chain) Fetch(key string) (string, error) {
+func (c *chain) Fetch(key string) (string, error) {
 
 	errs := []string{}
 
@@ -59,7 +58,7 @@ func (c *Chain) Fetch(key string) (string, error) {
 }
 
 // FetchMulti retrieves multiple cached values from one of the registred cache storages
-func (c *Chain) FetchMulti(keys []string) map[string]string {
+func (c *chain) FetchMulti(keys []string) map[string]string {
 	result := make(map[string]string)
 
 	for _, key := range keys {
@@ -72,7 +71,7 @@ func (c *Chain) FetchMulti(keys []string) map[string]string {
 }
 
 // Flush removes all cached keys of the registered cache storages
-func (c *Chain) Flush() error {
+func (c *chain) Flush() error {
 	for _, driver := range c.drivers {
 		if err := driver.Flush(); err != nil {
 			return err
@@ -83,7 +82,7 @@ func (c *Chain) Flush() error {
 }
 
 // Save a value in all cache storages by key
-func (c *Chain) Save(key string, value string, lifeTime time.Duration) error {
+func (c *chain) Save(key string, value string, lifeTime time.Duration) error {
 
 	for _, driver := range c.drivers {
 		if err := driver.Save(key, value, lifeTime); err != nil {

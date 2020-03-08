@@ -7,19 +7,18 @@ import (
 )
 
 type (
-	// Memcached it's a wrap around the memcached driver
-	Memcached struct {
+	memcached struct {
 		driver *memcache.Client
 	}
 )
 
 // NewMemcached creates an instance of Memcached cache driver
 func NewMemcached(driver *memcache.Client) Cache {
-	return &Memcached{driver}
+	return &memcached{driver}
 }
 
 // Contains checks if cached key exists in Memcached storage
-func (m *Memcached) Contains(key string) bool {
+func (m *memcached) Contains(key string) bool {
 	if _, err := m.Fetch(key); err != nil {
 		return false
 	}
@@ -28,12 +27,12 @@ func (m *Memcached) Contains(key string) bool {
 }
 
 // Delete the cached key from Memcached storage
-func (m *Memcached) Delete(key string) error {
+func (m *memcached) Delete(key string) error {
 	return m.driver.Delete(key)
 }
 
 // Fetch retrieves the cached value from key of the Memcached storage
-func (m *Memcached) Fetch(key string) (string, error) {
+func (m *memcached) Fetch(key string) (string, error) {
 	item, err := m.driver.Get(key)
 
 	if err != nil {
@@ -46,7 +45,7 @@ func (m *Memcached) Fetch(key string) (string, error) {
 }
 
 // FetchMulti retrieves multiple cached value from keys of the Memcached storage
-func (m *Memcached) FetchMulti(keys []string) map[string]string {
+func (m *memcached) FetchMulti(keys []string) map[string]string {
 	result := make(map[string]string)
 
 	items, err := m.driver.GetMulti(keys)
@@ -63,12 +62,12 @@ func (m *Memcached) FetchMulti(keys []string) map[string]string {
 }
 
 // Flush removes all cached keys of the Memcached storage
-func (m *Memcached) Flush() error {
+func (m *memcached) Flush() error {
 	return m.driver.FlushAll()
 }
 
 // Save a value in Memcached storage by key
-func (m *Memcached) Save(key string, value string, lifeTime time.Duration) error {
+func (m *memcached) Save(key string, value string, lifeTime time.Duration) error {
 	err := m.driver.Set(
 		&memcache.Item{
 			Key:        key,

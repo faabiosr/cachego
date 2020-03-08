@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/suite"
-	"gopkg.in/redis.v4"
+	rd "gopkg.in/redis.v4"
 )
 
 type RedisTestSuite struct {
@@ -15,7 +15,7 @@ type RedisTestSuite struct {
 }
 
 func (s *RedisTestSuite) SetupTest() {
-	conn := redis.NewClient(&redis.Options{
+	conn := rd.NewClient(&rd.Options{
 		Addr: ":6379",
 	})
 
@@ -27,11 +27,11 @@ func (s *RedisTestSuite) SetupTest() {
 }
 
 func (s *RedisTestSuite) TestSaveThrowError() {
-	redis := redis.NewClient(&redis.Options{
+	conn := rd.NewClient(&rd.Options{
 		Addr: ":6380",
 	})
 
-	cache := NewRedis(redis)
+	cache := NewRedis(conn)
 
 	s.Assert().Error(cache.Save("foo", "bar", 0))
 }
@@ -46,11 +46,11 @@ func (s *RedisTestSuite) TestFetchThrowError() {
 
 	_ = s.cache.Save(key, value, 0)
 
-	redis := redis.NewClient(&redis.Options{
+	conn := rd.NewClient(&rd.Options{
 		Addr: ":6380",
 	})
 
-	cache := NewRedis(redis)
+	cache := NewRedis(conn)
 
 	result, err := cache.Fetch(key)
 
@@ -71,11 +71,11 @@ func (s *RedisTestSuite) TestFetch() {
 }
 
 func (s *RedisTestSuite) TestContainsThrowError() {
-	redis := redis.NewClient(&redis.Options{
+	conn := rd.NewClient(&rd.Options{
 		Addr: ":6380",
 	})
 
-	cache := NewRedis(redis)
+	cache := NewRedis(conn)
 
 	s.Assert().False(cache.Contains("bar"))
 }
@@ -88,11 +88,11 @@ func (s *RedisTestSuite) TestContains() {
 }
 
 func (s *RedisTestSuite) TestDeleteThrowError() {
-	redis := redis.NewClient(&redis.Options{
+	conn := rd.NewClient(&rd.Options{
 		Addr: ":6380",
 	})
 
-	cache := NewRedis(redis)
+	cache := NewRedis(conn)
 	s.Assert().Error(cache.Delete("bar"))
 }
 
@@ -105,11 +105,11 @@ func (s *RedisTestSuite) TestDelete() {
 }
 
 func (s *RedisTestSuite) TestFlushThrowError() {
-	redis := redis.NewClient(&redis.Options{
+	conn := rd.NewClient(&rd.Options{
 		Addr: ":6380",
 	})
 
-	cache := NewRedis(redis)
+	cache := NewRedis(conn)
 
 	s.Assert().Error(cache.Flush())
 }
@@ -122,7 +122,7 @@ func (s *RedisTestSuite) TestFlush() {
 }
 
 func (s *RedisTestSuite) TestFetchMultiReturnNoItemsWhenThrowError() {
-	cache := NewRedis(redis.NewClient(&redis.Options{
+	cache := NewRedis(rd.NewClient(&rd.Options{
 		Addr: ":6380",
 	}))
 

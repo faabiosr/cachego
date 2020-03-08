@@ -14,13 +14,11 @@ import (
 const ErrFileOpen = err("unable to open file")
 
 type (
-	// File store for caching data
-	File struct {
+	file struct {
 		dir string
 	}
 
-	// FileContent it's a structure of cached value
-	FileContent struct {
+	fileContent struct {
 		Duration int64  `json:"duration"`
 		Data     string `json:"data,omitempty"`
 	}
@@ -28,10 +26,10 @@ type (
 
 // NewFile creates an instance of File cache
 func NewFile(dir string) Cache {
-	return &File{dir}
+	return &file{dir}
 }
 
-func (f *File) createName(key string) string {
+func (f *file) createName(key string) string {
 	h := sha256.New()
 	_, _ = h.Write([]byte(key))
 	hash := hex.EncodeToString(h.Sum(nil))
@@ -43,7 +41,7 @@ func (f *File) createName(key string) string {
 	return filePath
 }
 
-func (f *File) read(key string) (*FileContent, error) {
+func (f *file) read(key string) (*fileContent, error) {
 	value, err := ioutil.ReadFile(
 		f.createName(key),
 	)
@@ -52,7 +50,7 @@ func (f *File) read(key string) (*FileContent, error) {
 		return nil, Wrap(ErrFileOpen, err)
 	}
 
-	content := &FileContent{}
+	content := &fileContent{}
 
 	err = json.Unmarshal(value, content)
 
@@ -73,7 +71,7 @@ func (f *File) read(key string) (*FileContent, error) {
 }
 
 // Contains checks if the cached key exists into the File storage
-func (f *File) Contains(key string) bool {
+func (f *file) Contains(key string) bool {
 
 	if _, err := f.read(key); err != nil {
 		return false
@@ -83,7 +81,7 @@ func (f *File) Contains(key string) bool {
 }
 
 // Delete the cached key from File storage
-func (f *File) Delete(key string) error {
+func (f *file) Delete(key string) error {
 	_, err := os.Stat(
 		f.createName(key),
 	)
@@ -104,7 +102,7 @@ func (f *File) Delete(key string) error {
 }
 
 // Fetch retrieves the cached value from key of the File storage
-func (f *File) Fetch(key string) (string, error) {
+func (f *file) Fetch(key string) (string, error) {
 	content, err := f.read(key)
 
 	if err != nil {
@@ -115,7 +113,7 @@ func (f *File) Fetch(key string) (string, error) {
 }
 
 // FetchMulti retrieve multiple cached values from keys of the File storage
-func (f *File) FetchMulti(keys []string) map[string]string {
+func (f *file) FetchMulti(keys []string) map[string]string {
 	result := make(map[string]string)
 
 	for _, key := range keys {
@@ -128,7 +126,7 @@ func (f *File) FetchMulti(keys []string) map[string]string {
 }
 
 // Flush removes all cached keys of the File storage
-func (f *File) Flush() error {
+func (f *file) Flush() error {
 	dir, err := os.Open(f.dir)
 
 	if err != nil {
@@ -147,7 +145,7 @@ func (f *File) Flush() error {
 }
 
 // Save a value in File storage by key
-func (f *File) Save(key string, value string, lifeTime time.Duration) error {
+func (f *file) Save(key string, value string, lifeTime time.Duration) error {
 
 	duration := int64(0)
 
@@ -155,7 +153,7 @@ func (f *File) Save(key string, value string, lifeTime time.Duration) error {
 		duration = time.Now().Unix() + int64(lifeTime.Seconds())
 	}
 
-	content := &FileContent{
+	content := &fileContent{
 		duration,
 		value,
 	}

@@ -9,31 +9,29 @@ import (
 const ErrSyncMapKeyNotFound = err("key not found")
 
 type (
-	// SyncMapItem structure for managing data and lifetime
-	SyncMapItem struct {
+	syncMapItem struct {
 		data     string
 		duration int64
 	}
 
-	// SyncMap store the data in memory without external server
-	SyncMap struct {
+	syncMap struct {
 		storage *sync.Map
 	}
 )
 
 // NewSyncMap creates an instance of SyncMap cache driver
 func NewSyncMap() Cache {
-	return &SyncMap{&sync.Map{}}
+	return &syncMap{&sync.Map{}}
 }
 
-func (sm *SyncMap) read(key string) (*SyncMapItem, error) {
+func (sm *syncMap) read(key string) (*syncMapItem, error) {
 	v, ok := sm.storage.Load(key)
 
 	if !ok {
 		return nil, ErrSyncMapKeyNotFound
 	}
 
-	item := v.(*SyncMapItem)
+	item := v.(*syncMapItem)
 
 	if item.duration == 0 {
 		return item, nil
@@ -48,7 +46,7 @@ func (sm *SyncMap) read(key string) (*SyncMapItem, error) {
 }
 
 // Contains checks if cached key exists in SyncMap storage
-func (sm *SyncMap) Contains(key string) bool {
+func (sm *syncMap) Contains(key string) bool {
 	if _, err := sm.Fetch(key); err != nil {
 		return false
 	}
@@ -57,13 +55,13 @@ func (sm *SyncMap) Contains(key string) bool {
 }
 
 // Delete the cached key from SyncMap storage
-func (sm *SyncMap) Delete(key string) error {
+func (sm *syncMap) Delete(key string) error {
 	sm.storage.Delete(key)
 	return nil
 }
 
 // Fetch retrieves the cached value from key of the SyncMap storage
-func (sm *SyncMap) Fetch(key string) (string, error) {
+func (sm *syncMap) Fetch(key string) (string, error) {
 	item, err := sm.read(key)
 
 	if err != nil {
@@ -74,7 +72,7 @@ func (sm *SyncMap) Fetch(key string) (string, error) {
 }
 
 // FetchMulti retrieves multiple cached value from keys of the SyncMap storage
-func (sm *SyncMap) FetchMulti(keys []string) map[string]string {
+func (sm *syncMap) FetchMulti(keys []string) map[string]string {
 	result := make(map[string]string)
 
 	for _, key := range keys {
@@ -87,20 +85,20 @@ func (sm *SyncMap) FetchMulti(keys []string) map[string]string {
 }
 
 // Flush removes all cached keys of the SyncMap storage
-func (sm *SyncMap) Flush() error {
+func (sm *syncMap) Flush() error {
 	sm.storage = &sync.Map{}
 	return nil
 }
 
 // Save a value in SyncMap storage by key
-func (sm *SyncMap) Save(key string, value string, lifeTime time.Duration) error {
+func (sm *syncMap) Save(key string, value string, lifeTime time.Duration) error {
 	duration := int64(0)
 
 	if lifeTime > 0 {
 		duration = time.Now().Unix() + int64(lifeTime.Seconds())
 	}
 
-	item := &SyncMapItem{value, duration}
+	item := &syncMapItem{value, duration}
 
 	sm.storage.Store(key, item)
 

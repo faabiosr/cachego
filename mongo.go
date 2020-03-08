@@ -8,13 +8,11 @@ import (
 )
 
 type (
-	// Mongo it's a wrap around the mgo driver
-	Mongo struct {
+	mongo struct {
 		collection *mgo.Collection
 	}
 
-	// MongoContent it's a bson structure of cached value
-	MongoContent struct {
+	mongoContent struct {
 		Duration int64
 		Key      string `bson:"_id"`
 		Value    string
@@ -23,11 +21,11 @@ type (
 
 // NewMongo creates an instance of Mongo cache driver
 func NewMongo(collection *mgo.Collection) Cache {
-	return &Mongo{collection}
+	return &mongo{collection}
 }
 
 // Contains checks if cached key exists in Mongo storage
-func (m *Mongo) Contains(key string) bool {
+func (m *mongo) Contains(key string) bool {
 	if _, err := m.Fetch(key); err != nil {
 		return false
 	}
@@ -36,13 +34,13 @@ func (m *Mongo) Contains(key string) bool {
 }
 
 // Delete the cached key from Mongo storage
-func (m *Mongo) Delete(key string) error {
+func (m *mongo) Delete(key string) error {
 	return m.collection.Remove(bson.M{"_id": key})
 }
 
 // Fetch retrieves the cached value from key of the Mongo storage
-func (m *Mongo) Fetch(key string) (string, error) {
-	content := &MongoContent{}
+func (m *mongo) Fetch(key string) (string, error) {
+	content := &mongoContent{}
 
 	err := m.collection.Find(bson.M{"_id": key}).One(content)
 
@@ -63,12 +61,12 @@ func (m *Mongo) Fetch(key string) (string, error) {
 }
 
 // FetchMulti retrieves multiple cached value from keys of the Mongo storage
-func (m *Mongo) FetchMulti(keys []string) map[string]string {
+func (m *mongo) FetchMulti(keys []string) map[string]string {
 	result := make(map[string]string)
 
 	iter := m.collection.Find(bson.M{"_id": bson.M{"$in": keys}}).Iter()
 
-	content := &MongoContent{}
+	content := &mongoContent{}
 
 	for iter.Next(content) {
 		result[content.Key] = content.Value
@@ -78,21 +76,21 @@ func (m *Mongo) FetchMulti(keys []string) map[string]string {
 }
 
 // Flush removes all cached keys of the Mongo storage
-func (m *Mongo) Flush() error {
+func (m *mongo) Flush() error {
 	_, err := m.collection.RemoveAll(bson.M{})
 
 	return err
 }
 
 // Save a value in Mongo storage by key
-func (m *Mongo) Save(key string, value string, lifeTime time.Duration) error {
+func (m *mongo) Save(key string, value string, lifeTime time.Duration) error {
 	duration := int64(0)
 
 	if lifeTime > 0 {
 		duration = time.Now().Unix() + int64(lifeTime.Seconds())
 	}
 
-	content := &MongoContent{
+	content := &mongoContent{
 		duration,
 		key,
 		value,

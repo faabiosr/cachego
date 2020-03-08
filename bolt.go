@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"time"
 
-	bolt "github.com/coreos/bbolt"
+	bt "github.com/coreos/bbolt"
 )
 
 var boltBucket = []byte("cachego")
@@ -13,27 +13,25 @@ var boltBucket = []byte("cachego")
 const ErrBoltBucketNotFound = err("Bucket not found")
 
 type (
-	// Bolt store for caching data
-	Bolt struct {
-		db *bolt.DB
+	bolt struct {
+		db *bt.DB
 	}
 
-	// BoltContent it's a structure of cached value
-	BoltContent struct {
+	boltContent struct {
 		Duration int64  `json:"duration"`
 		Data     string `json:"data,omitempty"`
 	}
 )
 
 // NewBolt creates an instance of BoltDB cache
-func NewBolt(db *bolt.DB) Cache {
-	return &Bolt{db}
+func NewBolt(db *bt.DB) Cache {
+	return &bolt{db}
 }
 
-func (b *Bolt) read(key string) (*BoltContent, error) {
+func (b *bolt) read(key string) (*boltContent, error) {
 	var value []byte
 
-	err := b.db.View(func(tx *bolt.Tx) error {
+	err := b.db.View(func(tx *bt.Tx) error {
 		bucket := tx.Bucket(boltBucket)
 
 		if bucket == nil {
@@ -49,7 +47,7 @@ func (b *Bolt) read(key string) (*BoltContent, error) {
 		return nil, err
 	}
 
-	content := &BoltContent{}
+	content := &boltContent{}
 
 	err = json.Unmarshal(value, content)
 
@@ -70,7 +68,7 @@ func (b *Bolt) read(key string) (*BoltContent, error) {
 }
 
 // Contains checks if the cached key exists into the BoltDB storage
-func (b *Bolt) Contains(key string) bool {
+func (b *bolt) Contains(key string) bool {
 	if _, err := b.read(key); err != nil {
 		return false
 	}
@@ -79,8 +77,8 @@ func (b *Bolt) Contains(key string) bool {
 }
 
 // Delete the cached key from BoltDB storage
-func (b *Bolt) Delete(key string) error {
-	err := b.db.Update(func(tx *bolt.Tx) error {
+func (b *bolt) Delete(key string) error {
+	err := b.db.Update(func(tx *bt.Tx) error {
 		bucket := tx.Bucket(boltBucket)
 
 		if bucket == nil {
@@ -94,7 +92,7 @@ func (b *Bolt) Delete(key string) error {
 }
 
 // Fetch retrieves the cached value from key of the BoltDB storage
-func (b *Bolt) Fetch(key string) (string, error) {
+func (b *bolt) Fetch(key string) (string, error) {
 	content, err := b.read(key)
 
 	if err != nil {
@@ -105,7 +103,7 @@ func (b *Bolt) Fetch(key string) (string, error) {
 }
 
 // FetchMulti retrieve multiple cached values from keys of the BoltDB storage
-func (b *Bolt) FetchMulti(keys []string) map[string]string {
+func (b *bolt) FetchMulti(keys []string) map[string]string {
 	result := make(map[string]string)
 
 	for _, key := range keys {
@@ -118,8 +116,8 @@ func (b *Bolt) FetchMulti(keys []string) map[string]string {
 }
 
 // Flush removes all cached keys of the BoltDB storage
-func (b *Bolt) Flush() error {
-	err := b.db.Update(func(tx *bolt.Tx) error {
+func (b *bolt) Flush() error {
+	err := b.db.Update(func(tx *bt.Tx) error {
 		err := tx.DeleteBucket(boltBucket)
 
 		if err != nil {
@@ -133,14 +131,14 @@ func (b *Bolt) Flush() error {
 }
 
 // Save a value in BoltDB storage by key
-func (b *Bolt) Save(key string, value string, lifeTime time.Duration) error {
+func (b *bolt) Save(key string, value string, lifeTime time.Duration) error {
 	duration := int64(0)
 
 	if lifeTime > 0 {
 		duration = time.Now().Unix() + int64(lifeTime.Seconds())
 	}
 
-	content := &BoltContent{
+	content := &boltContent{
 		duration,
 		value,
 	}
@@ -151,7 +149,7 @@ func (b *Bolt) Save(key string, value string, lifeTime time.Duration) error {
 		return Wrap(ErrDecode, err)
 	}
 
-	err = b.db.Update(func(tx *bolt.Tx) error {
+	err = b.db.Update(func(tx *bt.Tx) error {
 		bucket, err := tx.CreateBucketIfNotExists(boltBucket)
 
 		if err != nil {

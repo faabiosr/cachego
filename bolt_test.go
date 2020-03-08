@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	bolt "github.com/coreos/bbolt"
+	bt "github.com/coreos/bbolt"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -14,7 +14,7 @@ type BoltTestSuite struct {
 	suite.Suite
 
 	cache     Cache
-	db        *bolt.DB
+	db        *bt.DB
 	directory string
 }
 
@@ -23,7 +23,7 @@ func (s *BoltTestSuite) SetupTest() {
 
 	_ = os.Mkdir(s.directory, 0777)
 
-	db, err := bolt.Open(s.directory+"cachego.db", 0600, nil)
+	db, err := bt.Open(s.directory+"cachego.db", 0600, nil)
 
 	if err != nil {
 		s.T().Skip()
@@ -44,8 +44,8 @@ func (s *BoltTestSuite) TestSave() {
 func (s *BoltTestSuite) TestSaveThrowError() {
 	s.db.Close()
 
-	opts := &bolt.Options{ReadOnly: true}
-	db, err := bolt.Open(s.directory+"cachego.db", 0666, opts)
+	opts := &bt.Options{ReadOnly: true}
+	db, err := bt.Open(s.directory+"cachego.db", 0666, opts)
 
 	if err != nil {
 		fmt.Println(err)
