@@ -1,8 +1,6 @@
 package cachego
 
 import (
-	"fmt"
-	"strings"
 	"time"
 )
 
@@ -41,20 +39,15 @@ func (c *chain) Delete(key string) error {
 
 // Fetch retrieves the value of one of the registred cache storages
 func (c *chain) Fetch(key string) (string, error) {
-
-	errs := []string{}
-
 	for _, driver := range c.drivers {
 		value, err := driver.Fetch(key)
 
 		if err == nil {
 			return value, nil
 		}
-
-		errs = append(errs, err.Error())
 	}
 
-	return "", fmt.Errorf("Key not found in cache chain. Errors: %s", strings.Join(errs, ","))
+	return "", err("key not found in cache chain")
 }
 
 // FetchMulti retrieves multiple cached values from one of the registred cache storages
@@ -83,7 +76,6 @@ func (c *chain) Flush() error {
 
 // Save a value in all cache storages by key
 func (c *chain) Save(key string, value string, lifeTime time.Duration) error {
-
 	for _, driver := range c.drivers {
 		if err := driver.Save(key, value, lifeTime); err != nil {
 			return err

@@ -5,114 +5,63 @@ import (
 	"time"
 
 	"github.com/bradfitz/gomemcache/memcache"
-	"github.com/stretchr/testify/suite"
 )
 
-type ChainTestSuite struct {
-	suite.Suite
+func TestChain(t *testing.T) {
+	c := NewChain(NewMap())
 
-	cache Cache
-}
+	if err := c.Save(testKey, testValue, 1*time.Nanosecond); err != nil {
+		t.Errorf("save fail: expected nil, got %v", err)
+	}
 
-func (s *ChainTestSuite) SetupTest() {
-	s.cache = NewChain(NewMap())
-}
+	if _, err := c.Fetch(testKey); err == nil {
+		t.Errorf("fetch fail: expected an error, got %v", err)
+	}
 
-func (s *ChainTestSuite) TestSaveThrowErrorWhenOneOfDriverFail() {
-	cache := NewChain(
+	_ = c.Save(testKey, testValue, 10*time.Second)
+
+	if res, _ := c.Fetch(testKey); res != testValue {
+		t.Errorf("fetch fail, wrong value: expected %s, got %s", testValue, res)
+	}
+
+	_ = c.Save(testKey, testValue, 0)
+
+	if !c.Contains(testKey) {
+		t.Errorf("contains failed: the key %s should be exist", testKey)
+	}
+
+	_ = c.Save("bar", testValue, 0)
+
+	if values := c.FetchMulti([]string{testKey, "bar"}); len(values) == 0 {
+		t.Errorf("fetch multi failed: expected %d, got %d", 2, len(values))
+	}
+
+	if err := c.Delete(testKey); err != nil {
+		t.Errorf("delete failed: expected nil, got %v", err)
+	}
+
+	if err := c.Flush(); err != nil {
+		t.Errorf("flush failed: expected nil, got %v", err)
+	}
+
+	if c.Contains(testKey) {
+		t.Errorf("contains failed: the key %s should not be exist", testKey)
+	}
+
+	c = NewChain(
 		NewMap(),
 		NewMemcached(memcache.New("127.0.0.1:22222")),
 	)
 
-	s.Assert().Error(cache.Save("foo", "bar", 0))
-}
+	if err := c.Save(testKey, testValue, 0); err == nil {
+		t.Errorf("save failed: expected an error, got %v", err)
+	}
 
-func (s *ChainTestSuite) TestSave() {
-	s.Assert().Nil(s.cache.Save("foo", "bar", 0))
-}
+	if err := c.Delete(testKey); err == nil {
+		t.Errorf("delete failed: expected an error, got %v", err)
+	}
 
-func (s *ChainTestSuite) TestFetchThrowErrorWhenExpired() {
-	key := "foo"
-	value := "bar"
-
-	_ = s.cache.Save(key, value, 1*time.Second)
-
-	time.Sleep(1 * time.Second)
-
-	result, err := s.cache.Fetch(key)
-
-	s.Assert().Regexp("^Key not found in cache chain", err)
-	s.Assert().Empty(result)
-}
-
-func (s *ChainTestSuite) TestFetch() {
-	key := "foo"
-	value := "bar"
-
-	_ = s.cache.Save(key, value, 0)
-
-	result, err := s.cache.Fetch(key)
-
-	s.Assert().Nil(err)
-	s.Assert().Equal(value, result)
-}
-
-func (s *ChainTestSuite) TestContains() {
-	_ = s.cache.Save("foo", "bar", 0)
-
-	s.Assert().True(s.cache.Contains("foo"))
-	s.Assert().False(s.cache.Contains("bar"))
-}
-
-func (s *ChainTestSuite) TestDeleteThrowErrorWhenOneOfDriverFail() {
-	cache := NewChain(
-		NewMap(),
-		NewMemcached(memcache.New("127.0.0.1:22222")),
-	)
-
-	s.Assert().Error(cache.Delete("foo"))
-}
-
-func (s *ChainTestSuite) TestDelete() {
-	_ = s.cache.Save("foo", "bar", 0)
-
-	s.Assert().Nil(s.cache.Delete("foo"))
-	s.Assert().False(s.cache.Contains("foo"))
-}
-
-func (s *ChainTestSuite) TestFlushThrowErrorWhenOneOfDriverFail() {
-	cache := NewChain(
-		NewMap(),
-		NewMemcached(memcache.New("127.0.0.1:22222")),
-	)
-
-	s.Assert().Error(cache.Flush())
-}
-
-func (s *ChainTestSuite) TestFlush() {
-	_ = s.cache.Save("foo", "bar", 0)
-
-	s.Assert().Nil(s.cache.Flush())
-	s.Assert().False(s.cache.Contains("foo"))
-}
-
-func (s *ChainTestSuite) TestFetchMulti() {
-	_ = s.cache.Save("foo", "bar", 0)
-	_ = s.cache.Save("john", "doe", 0)
-
-	result := s.cache.FetchMulti([]string{"foo", "john"})
-
-	s.Assert().Len(result, 2)
-}
-
-func (s *ChainTestSuite) TestFetchMultiWhenOnlyOneOfKeysExists() {
-	_ = s.cache.Save("foo", "bar", 0)
-
-	result := s.cache.FetchMulti([]string{"foo", "alice"})
-
-	s.Assert().Len(result, 1)
-}
-
-func TestChainRunSuite(t *testing.T) {
-	suite.Run(t, new(ChainTestSuite))
+	if err := c.Flush(); err == nil {
+		t.Errorf("flush failed: expected an error, got %v", err)
+	}
 }

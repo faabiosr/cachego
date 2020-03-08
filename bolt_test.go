@@ -7,165 +7,81 @@ import (
 	"time"
 
 	bt "github.com/coreos/bbolt"
-	"github.com/stretchr/testify/suite"
 )
 
-type BoltTestSuite struct {
-	suite.Suite
+func TestBolt(t *testing.T) {
+	dir := "./cache-dir"
+	_ = os.Mkdir(dir, 0777)
 
-	cache     Cache
-	db        *bt.DB
-	directory string
-}
-
-func (s *BoltTestSuite) SetupTest() {
-	s.directory = "./cache-dir/"
-
-	_ = os.Mkdir(s.directory, 0777)
-
-	db, err := bt.Open(s.directory+"cachego.db", 0600, nil)
+	db, err := bt.Open(fmt.Sprintf("%s/cachego.db", dir), 0600, nil)
 
 	if err != nil {
-		s.T().Skip()
-	}
-
-	s.db = db
-	s.cache = NewBolt(s.db)
-}
-
-func (s *BoltTestSuite) TearDownTest() {
-	s.db.Close()
-}
-
-func (s *BoltTestSuite) TestSave() {
-	s.Assert().Nil(s.cache.Save("foo", "bar", 0))
-}
-
-func (s *BoltTestSuite) TestSaveThrowError() {
-	s.db.Close()
-
-	opts := &bt.Options{ReadOnly: true}
-	db, err := bt.Open(s.directory+"cachego.db", 0666, opts)
-
-	if err != nil {
-		fmt.Println(err)
+		t.Skip(err)
 	}
 
 	defer db.Close()
 
-	cache := NewBolt(db)
-	err = cache.Save("foo", "bar", 0)
+	c := NewBolt(db)
 
-	s.Assert().Error(err)
-	s.Assert().Contains(err.Error(), ErrSave)
+	if err := c.Save(testKey, testValue, 1*time.Nanosecond); err != nil {
+		t.Errorf("save fail: expected nil, got %v", err)
+	}
+
+	if _, err := c.Fetch(testKey); err == nil {
+		t.Errorf("fetch fail: expected an error, got %v", err)
+	}
+
+	_ = c.Save(testKey, testValue, 10*time.Second)
+
+	if res, _ := c.Fetch(testKey); res != testValue {
+		t.Errorf("fetch fail, wrong value: expected %s, got %s", testValue, res)
+	}
+
+	_ = c.Save(testKey, testValue, 0)
+
+	if !c.Contains(testKey) {
+		t.Errorf("contains failed: the key %s should be exist", testKey)
+	}
+
+	_ = c.Save("bar", testValue, 0)
+
+	if values := c.FetchMulti([]string{testKey, "bar"}); len(values) == 0 {
+		t.Errorf("fetch multi failed: expected %d, got %d", 2, len(values))
+	}
+
+	if err := c.Flush(); err != nil {
+		t.Errorf("flush failed: expected nil, got %v", err)
+	}
+
+	if err := c.Flush(); err == nil {
+		t.Errorf("flush failed: expected error, got %v", err)
+	}
+
+	if err := c.Delete(testKey); err == nil {
+		t.Errorf("delete failed: expected error, got %v", err)
+	}
+
+	if c.Contains(testKey) {
+		t.Errorf("contains failed: the key %s should not be exist", testKey)
+	}
 }
 
-func (s *BoltTestSuite) TestFetchThrowErrorWhenBucketNotFound() {
-	s.cache.Flush()
+func TestBoltSaveWithReadOnlyDB(t *testing.T) {
+	dir := "./cache-dir"
+	_ = os.Mkdir(dir, 0777)
 
-	result, err := s.cache.Fetch("foo")
+	db, err := bt.Open(fmt.Sprintf("%s/cachego.db", dir), 0666, &bt.Options{ReadOnly: true})
 
-	s.Assert().Empty(result)
-	s.Assert().EqualError(err, ErrBoltBucketNotFound.Error())
-}
+	if err != nil {
+		t.Skip(err)
+	}
 
-func (s *BoltTestSuite) TestFetchThrowErrorWhenExpired() {
-	key := "foo"
-	value := "bar"
+	defer db.Close()
 
-	_ = s.cache.Save(key, value, 1*time.Second)
+	c := NewBolt(db)
 
-	time.Sleep(1 * time.Second)
+	if err := c.Save(testKey, testValue, 0); err == nil {
+		t.Errorf("save failed: expected error, got %v", err)
 
-	result, err := s.cache.Fetch(key)
-
-	s.Assert().Empty(result)
-	s.Assert().EqualError(err, ErrCacheExpired.Error())
-}
-
-func (s *BoltTestSuite) TestFetch() {
-	key := "foo"
-	value := "bar"
-
-	_ = s.cache.Save(key, value, 0)
-	result, err := s.cache.Fetch(key)
-
-	s.Assert().Nil(err)
-	s.Assert().Equal(value, result)
-}
-
-func (s *BoltTestSuite) TestFetchLongCacheDuration() {
-	key := "foo"
-	value := "bar"
-
-	_ = s.cache.Save(key, value, 10*time.Second)
-	result, err := s.cache.Fetch(key)
-
-	s.Assert().Nil(err)
-	s.Assert().Equal(value, result)
-}
-
-func (s *BoltTestSuite) TestContains() {
-	_ = s.cache.Save("foo", "bar", 0)
-
-	s.Assert().True(s.cache.Contains("foo"))
-	s.Assert().False(s.cache.Contains("bar"))
-}
-
-func (s *BoltTestSuite) TestDeleteThrowErrorWhenBucketNotFound() {
-	s.cache.Flush()
-
-	err := s.cache.Delete("foo")
-
-	s.Assert().EqualError(err, ErrBoltBucketNotFound.Error())
-}
-
-func (s *BoltTestSuite) TestDelete() {
-	_ = s.cache.Save("foo", "bar", 0)
-
-	s.Assert().Nil(s.cache.Delete("foo"))
-	s.Assert().False(s.cache.Contains("foo"))
-	s.Assert().Nil(s.cache.Delete("bar"))
-}
-
-func (s *BoltTestSuite) TestFlushThrowErrorWhenBucketNotFound() {
-	err := s.cache.Flush()
-
-	s.Assert().Error(err)
-	s.Assert().Contains(err.Error(), ErrFlush)
-}
-
-func (s *BoltTestSuite) TestFlush() {
-	_ = s.cache.Save("foo", "bar", 0)
-
-	s.Assert().Nil(s.cache.Flush())
-	s.Assert().False(s.cache.Contains("foo"))
-}
-
-func (s *BoltTestSuite) TestFetchMultiReturnNoItemsWhenThrowError() {
-	s.cache.Flush()
-	result := s.cache.FetchMulti([]string{"foo"})
-
-	s.Assert().Len(result, 0)
-}
-
-func (s *BoltTestSuite) TestFetchMulti() {
-	_ = s.cache.Save("foo", "bar", 0)
-	_ = s.cache.Save("john", "doe", 0)
-
-	result := s.cache.FetchMulti([]string{"foo", "john"})
-
-	s.Assert().Len(result, 2)
-}
-
-func (s *BoltTestSuite) TestFetchMultiWhenOnlyOneOfKeysExists() {
-	_ = s.cache.Save("foo", "bar", 0)
-
-	result := s.cache.FetchMulti([]string{"foo", "alice"})
-
-	s.Assert().Len(result, 1)
-}
-
-func TestBoltRunSuite(t *testing.T) {
-	suite.Run(t, new(BoltTestSuite))
+	}
 }

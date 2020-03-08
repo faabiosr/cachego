@@ -3,99 +3,42 @@ package cachego
 import (
 	"testing"
 	"time"
-
-	"github.com/stretchr/testify/suite"
 )
 
-type MapTestSuite struct {
-	suite.Suite
+func TestMap(t *testing.T) {
+	c := NewMap()
 
-	cache Cache
-}
+	if err := c.Save(testKey, testValue, 1*time.Nanosecond); err != nil {
+		t.Errorf("save fail: expected nil, got %v", err)
+	}
 
-func (s *MapTestSuite) SetupTest() {
-	s.cache = NewMap()
-}
+	if _, err := c.Fetch(testKey); err == nil {
+		t.Errorf("fetch fail: expected an error, got %v", err)
+	}
 
-func (s *MapTestSuite) TestSave() {
-	s.Assert().Nil(s.cache.Save("foo", "bar", 0))
-}
+	_ = c.Save(testKey, testValue, 10*time.Second)
 
-func (s *MapTestSuite) TestFetchThrowErrorWhenExpired() {
-	key := "foo"
-	value := "bar"
+	if res, _ := c.Fetch(testKey); res != testValue {
+		t.Errorf("fetch fail, wrong value: expected %s, got %s", testValue, res)
+	}
 
-	_ = s.cache.Save(key, value, 1*time.Second)
+	_ = c.Save(testKey, testValue, 0)
 
-	time.Sleep(1 * time.Second)
+	if !c.Contains(testKey) {
+		t.Errorf("contains failed: the key %s should be exist", testKey)
+	}
 
-	result, err := s.cache.Fetch(key)
+	_ = c.Save("bar", testValue, 0)
 
-	s.Assert().Empty(result)
-	s.Assert().EqualError(err, ErrCacheExpired.Error())
-}
+	if values := c.FetchMulti([]string{testKey, "bar"}); len(values) == 0 {
+		t.Errorf("fetch multi failed: expected %d, got %d", 2, len(values))
+	}
 
-func (s *MapTestSuite) TestFetch() {
-	key := "foo"
-	value := "bar"
+	if err := c.Flush(); err != nil {
+		t.Errorf("flush failed: expected nil, got %v", err)
+	}
 
-	_ = s.cache.Save(key, value, 0)
-
-	result, err := s.cache.Fetch(key)
-
-	s.Assert().Nil(err)
-	s.Assert().Equal(value, result)
-}
-
-func (s *MapTestSuite) TestFetchLongCacheDuration() {
-	key := "foo"
-	value := "bar"
-
-	_ = s.cache.Save(key, value, 10*time.Second)
-	result, err := s.cache.Fetch(key)
-
-	s.Assert().Nil(err)
-	s.Assert().Equal(value, result)
-}
-
-func (s *MapTestSuite) TestContains() {
-	_ = s.cache.Save("foo", "bar", 0)
-
-	s.Assert().True(s.cache.Contains("foo"))
-	s.Assert().False(s.cache.Contains("bar"))
-}
-
-func (s *MapTestSuite) TestDelete() {
-	_ = s.cache.Save("foo", "bar", 0)
-
-	s.Assert().Nil(s.cache.Delete("foo"))
-	s.Assert().False(s.cache.Contains("foo"))
-}
-
-func (s *MapTestSuite) TestFlush() {
-	_ = s.cache.Save("foo", "bar", 0)
-
-	s.Assert().Nil(s.cache.Flush())
-	s.Assert().False(s.cache.Contains("foo"))
-}
-
-func (s *MapTestSuite) TestFetchMulti() {
-	_ = s.cache.Save("foo", "bar", 0)
-	_ = s.cache.Save("john", "doe", 0)
-
-	result := s.cache.FetchMulti([]string{"foo", "john"})
-
-	s.Assert().Len(result, 2)
-}
-
-func (s *MapTestSuite) TestFetchMultiWhenOnlyOneOfKeysExists() {
-	_ = s.cache.Save("foo", "bar", 0)
-
-	result := s.cache.FetchMulti([]string{"foo", "alice"})
-
-	s.Assert().Len(result, 1)
-}
-
-func TestMapRunSuite(t *testing.T) {
-	suite.Run(t, new(MapTestSuite))
+	if c.Contains(testKey) {
+		t.Errorf("contains failed: the key %s should not be exist", testKey)
+	}
 }

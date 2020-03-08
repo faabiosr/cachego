@@ -8,181 +8,103 @@ import (
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/stretchr/testify/suite"
 )
 
-type Sqlite3TestSuite struct {
-	suite.Suite
-
-	cache Cache
-	db    *sql.DB
-}
-
-var (
-	cacheTable = "cache"
-	dbPath     = "./cache.db"
+const (
+	testTable  = "cache"
+	testDBPath = "./cache.db"
 )
 
-func (s *Sqlite3TestSuite) SetupTest() {
-
-	db, err := sql.Open("sqlite3", dbPath)
-
-	if err != nil {
-		s.T().Skip()
-	}
-
-	s.cache, err = NewSqlite3(db, cacheTable)
+func TestSqlite3(t *testing.T) {
+	db, err := sql.Open("sqlite3", testDBPath)
 
 	if err != nil {
-		s.T().Skip()
+		t.Skip(err)
 	}
 
-	s.db = db
+	c, err := NewSqlite3(db, testTable)
+
+	if err != nil {
+		t.Skip(err)
+	}
+
+	defer os.Remove(testDBPath)
+
+	if err := c.Save(testKey, testValue, 1*time.Nanosecond); err != nil {
+		t.Errorf("save fail: expected nil, got %v", err)
+	}
+
+	if _, err := c.Fetch(testKey); err == nil {
+		t.Errorf("fetch fail: expected an error, got %v", err)
+	}
+
+	_ = c.Save(testKey, testValue, 10*time.Second)
+
+	if res, _ := c.Fetch(testKey); res != testValue {
+		t.Errorf("fetch fail, wrong value: expected %s, got %s", testValue, res)
+	}
+
+	_ = c.Save(testKey, testValue, 0)
+
+	if !c.Contains(testKey) {
+		t.Errorf("contains failed: the key %s should be exist", testKey)
+	}
+
+	_ = c.Save("bar", testValue, 0)
+
+	if values := c.FetchMulti([]string{testKey, "bar"}); len(values) == 0 {
+		t.Errorf("fetch multi failed: expected %d, got %d", 2, len(values))
+	}
+
+	if err := c.Flush(); err != nil {
+		t.Errorf("flush failed: expected nil, got %v", err)
+	}
+
+	if c.Contains(testKey) {
+		t.Errorf("contains failed: the key %s should not be exist", testKey)
+	}
 }
 
-func (s *Sqlite3TestSuite) TearDownTest() {
-	os.Remove(dbPath)
-}
+func TestSqlite3Fail(t *testing.T) {
+	db, _ := sql.Open("sqlite3", testDBPath)
+	db.Close()
 
-func (s *Sqlite3TestSuite) TestCreateInstanceThrowAnError() {
-	s.db.Close()
+	defer os.Remove(testDBPath)
 
-	_, err := NewSqlite3(s.db, cacheTable)
+	if _, err := NewSqlite3(db, testTable); err == nil {
+		t.Errorf("constructor failed: expected an error, got %v", err)
+	}
 
-	s.Assert().Error(err)
-}
+	db, _ = sql.Open("sqlite3", testDBPath)
+	c, _ := NewSqlite3(db, testTable)
+	db.Close()
 
-func (s *Sqlite3TestSuite) TestSaveThrowAnError() {
-	s.db.Close()
+	if err := c.Save(testKey, testValue, 0); err == nil {
+		t.Errorf("save failed: expected an error, got %v", err)
+	}
 
-	s.Assert().Error(s.cache.Save("foo", "bar", 0))
-}
+	if err := c.Delete(testKey); err == nil {
+		t.Errorf("delete failed: expected an error, got %v", err)
+	}
 
-func (s *Sqlite3TestSuite) TestSaveThrowAnErrorWhenDropTable() {
-	_, _ = s.db.Exec(fmt.Sprintf("DROP TABLE %s;", cacheTable))
+	if err := c.Flush(); err == nil {
+		t.Errorf("flush failed: expected an error, got %v", err)
+	}
 
-	s.Assert().Error(s.cache.Save("foo", "bar", 0))
-}
+	db, _ = sql.Open("sqlite3", testDBPath)
+	c, _ = NewSqlite3(db, testTable)
 
-func (s *Sqlite3TestSuite) TestSave() {
-	s.Assert().Nil(s.cache.Save("foo", "bar", 0))
-}
+	_, _ = db.Exec(fmt.Sprintf("DROP TABLE %s;", testTable))
 
-func (s *Sqlite3TestSuite) TestFetchThrowAnError() {
-	key := "foo"
-	value := "bar"
+	if err := c.Save(testKey, testValue, 0); err == nil {
+		t.Errorf("save failed: expected an error, got %v", err)
+	}
 
-	_ = s.cache.Save(key, value, 1)
+	if err := c.Delete(testKey); err == nil {
+		t.Errorf("delete failed: expected an error, got %v", err)
+	}
 
-	result, err := s.cache.Fetch(key)
-
-	s.Assert().Error(err)
-	s.Assert().Empty(result)
-}
-
-func (s *Sqlite3TestSuite) TestFetch() {
-	key := "foo"
-	value := "bar"
-
-	_ = s.cache.Save(key, value, 0)
-
-	result, err := s.cache.Fetch(key)
-
-	s.Assert().Nil(err)
-	s.Assert().Equal(value, result)
-}
-
-func (s *Sqlite3TestSuite) TestFetchWithLongLifetime() {
-	key := "foo"
-	value := "bar"
-
-	_ = s.cache.Save(key, value, 10*time.Second)
-
-	result, err := s.cache.Fetch(key)
-
-	s.Assert().Nil(err)
-	s.Assert().Equal(value, result)
-}
-
-func (s *Sqlite3TestSuite) TestContainsThrowAnError() {
-	s.Assert().False(s.cache.Contains("bar"))
-}
-
-func (s *Sqlite3TestSuite) TestContains() {
-	_ = s.cache.Save("foo", "bar", 0)
-
-	s.Assert().True(s.cache.Contains("foo"))
-	s.Assert().False(s.cache.Contains("bar"))
-}
-
-func (s *Sqlite3TestSuite) TestDeleteThrowAnError() {
-	s.db.Close()
-
-	s.Assert().Error(
-		s.cache.Delete("cccc"),
-	)
-}
-
-func (s *Sqlite3TestSuite) TestDeleteThrowAnErrorWhenDropTable() {
-	_, _ = s.db.Exec(fmt.Sprintf("DROP TABLE %s;", cacheTable))
-
-	s.Assert().Error(
-		s.cache.Delete("cccc"),
-	)
-}
-
-func (s *Sqlite3TestSuite) TestDelete() {
-	_ = s.cache.Save("foo", "bar", 0)
-
-	s.Assert().Nil(s.cache.Delete("foo"))
-	s.Assert().False(s.cache.Contains("foo"))
-	s.Assert().Nil(s.cache.Delete("foo"))
-}
-
-func (s *Sqlite3TestSuite) TestFlushThrowAnError() {
-	s.db.Close()
-
-	s.Assert().Error(s.cache.Flush())
-}
-
-func (s *Sqlite3TestSuite) TestFlushThrowAnErrorWhenDropTable() {
-	_, _ = s.db.Exec(fmt.Sprintf("DROP TABLE %s;", cacheTable))
-
-	s.Assert().Error(s.cache.Flush())
-}
-
-func (s *Sqlite3TestSuite) TestFlush() {
-	_ = s.cache.Save("foo", "bar", 0)
-
-	s.Assert().Nil(s.cache.Flush())
-	s.Assert().False(s.cache.Contains("foo"))
-}
-
-func (s *Sqlite3TestSuite) TestFetchMultiReturnNoItemsWhenThrowAnError() {
-	s.db.Close()
-
-	result := s.cache.FetchMulti([]string{"foo"})
-
-	s.Assert().Len(result, 0)
-}
-
-func (s *Sqlite3TestSuite) TestFetchMulti() {
-	_ = s.cache.Save("foo", "bar", 0)
-	_ = s.cache.Save("john", "doe", 0)
-
-	result := s.cache.FetchMulti([]string{"foo", "john"})
-
-	s.Assert().Len(result, 2)
-}
-
-func (s *Sqlite3TestSuite) TestFetchMultiWhenOnlyOneOfKeysExists() {
-	_ = s.cache.Save("foo", "bar", 0)
-
-	result := s.cache.FetchMulti([]string{"foo", "alice"})
-
-	s.Assert().Len(result, 1)
-}
-
-func TestSqlite3RunSuite(t *testing.T) {
-	suite.Run(t, new(Sqlite3TestSuite))
+	if err := c.Flush(); err == nil {
+		t.Errorf("flush failed: expected an error, got %v", err)
+	}
 }

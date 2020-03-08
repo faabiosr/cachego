@@ -5,122 +5,55 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/suite"
 	"gopkg.in/mgo.v2"
 )
 
-type MongoTestSuite struct {
-	suite.Suite
-
-	cache Cache
-}
-
-func (s *MongoTestSuite) SetupTest() {
+func TestMongo(t *testing.T) {
 	address := "localhost:27017"
 
 	if _, err := net.Dial("tcp", address); err != nil {
-		s.T().Skip()
+		t.Skip(err)
 	}
 
 	session, err := mgo.Dial(address)
 
 	if err != nil {
-		s.T().Skip()
+		t.Skip(err)
 	}
 
-	s.cache = NewMongo(session.DB("cache").C("cache"))
-}
+	c := NewMongo(session.DB("cache").C("cache"))
 
-func (s *MongoTestSuite) TestSave() {
-	s.Assert().Nil(s.cache.Save("foo", "bar", 10))
-}
+	if err := c.Save(testKey, testValue, 1*time.Nanosecond); err != nil {
+		t.Errorf("save fail: expected nil, got %v", err)
+	}
 
-func (s *MongoTestSuite) TestFetchThrowError() {
-	result, err := s.cache.Fetch("bar")
+	if _, err := c.Fetch(testKey); err == nil {
+		t.Errorf("fetch fail: expected an error, got %v", err)
+	}
 
-	s.Assert().Error(err)
-	s.Assert().Empty(result)
-}
+	_ = c.Save(testKey, testValue, 10*time.Second)
 
-func (s *MongoTestSuite) TestFetchThrowErrorWhenExpired() {
-	key := "foo"
-	value := "bar"
+	if res, _ := c.Fetch(testKey); res != testValue {
+		t.Errorf("fetch fail, wrong value: expected %s, got %s", testValue, res)
+	}
 
-	_ = s.cache.Save(key, value, 1*time.Second)
+	_ = c.Save(testKey, testValue, 0)
 
-	time.Sleep(1 * time.Second)
+	if !c.Contains(testKey) {
+		t.Errorf("contains failed: the key %s should be exist", testKey)
+	}
 
-	result, err := s.cache.Fetch(key)
+	_ = c.Save("bar", testValue, 0)
 
-	s.Assert().Empty(result)
-	s.Assert().EqualError(err, ErrCacheExpired.Error())
-}
+	if values := c.FetchMulti([]string{testKey, "bar"}); len(values) == 0 {
+		t.Errorf("fetch multi failed: expected %d, got %d", 2, len(values))
+	}
 
-func (s *MongoTestSuite) TestFetch() {
-	key := "foo"
-	value := "bar"
+	if err := c.Flush(); err != nil {
+		t.Errorf("flush failed: expected nil, got %v", err)
+	}
 
-	_ = s.cache.Save(key, value, 0)
-
-	result, err := s.cache.Fetch(key)
-
-	s.Assert().Nil(err)
-	s.Assert().Equal(value, result)
-}
-
-func (s *MongoTestSuite) TestFetchLongCacheDuration() {
-	key := "foo"
-	value := "bar"
-
-	_ = s.cache.Save(key, value, 10*time.Second)
-	result, err := s.cache.Fetch(key)
-
-	s.Assert().Nil(err)
-	s.Assert().Equal(value, result)
-}
-
-func (s *MongoTestSuite) TestContains() {
-	_ = s.cache.Save("foo", "bar", 0)
-
-	s.Assert().True(s.cache.Contains("foo"))
-	s.Assert().False(s.cache.Contains("bar"))
-}
-
-func (s *MongoTestSuite) TestDeleteThrowError() {
-	s.Assert().Error(s.cache.Delete("bar"))
-}
-
-func (s *MongoTestSuite) TestDelete() {
-	_ = s.cache.Save("foo", "bar", 0)
-
-	s.Assert().Nil(s.cache.Delete("foo"))
-	s.Assert().False(s.cache.Contains("foo"))
-}
-
-func (s *MongoTestSuite) TestFlush() {
-	_ = s.cache.Save("foo", "bar", 0)
-
-	s.Assert().Nil(s.cache.Flush())
-	s.Assert().False(s.cache.Contains("foo"))
-}
-
-func (s *MongoTestSuite) TestFetchMulti() {
-	_ = s.cache.Save("foo", "bar", 0)
-	_ = s.cache.Save("john", "doe", 0)
-
-	result := s.cache.FetchMulti([]string{"foo", "john"})
-
-	s.Assert().Len(result, 2)
-}
-
-func (s *MongoTestSuite) TestFetchMultiWhenOnlyOneOfKeysExists() {
-	_ = s.cache.Save("foo", "bar", 0)
-
-	result := s.cache.FetchMulti([]string{"foo", "alice"})
-
-	s.Assert().Len(result, 1)
-}
-
-func TestMongoRunSuite(t *testing.T) {
-	suite.Run(t, new(MongoTestSuite))
+	if c.Contains(testKey) {
+		t.Errorf("contains failed: the key %s should not be exist", testKey)
+	}
 }

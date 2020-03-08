@@ -4,140 +4,60 @@ import (
 	"os"
 	"testing"
 	"time"
-
-	"github.com/stretchr/testify/suite"
 )
 
-type FileTestSuite struct {
-	suite.Suite
+func TestFile(t *testing.T) {
+	dir := "./cache-dir/"
 
-	cache Cache
-}
+	_ = os.Mkdir(dir, 0777)
 
-func (s *FileTestSuite) SetupTest() {
-	directory := "./cache-dir/"
+	c := NewFile(dir)
 
-	_ = os.Mkdir(directory, 0777)
+	if err := c.Save(testKey, testValue, 1*time.Nanosecond); err != nil {
+		t.Errorf("save fail: expected nil, got %v", err)
+	}
 
-	s.cache = NewFile(directory)
-}
+	if _, err := c.Fetch(testKey); err == nil {
+		t.Errorf("fetch fail: expected an error, got %v", err)
+	}
 
-func (s *FileTestSuite) TestSaveThrowError() {
-	cache := NewFile("./test/")
+	_ = c.Save(testKey, testValue, 10*time.Second)
 
-	err := cache.Save("foo", "bar", 0)
+	if res, _ := c.Fetch(testKey); res != testValue {
+		t.Errorf("fetch fail, wrong value: expected %s, got %s", testValue, res)
+	}
 
-	s.Assert().Error(err)
-	s.Assert().Contains(err.Error(), ErrSave)
-}
+	_ = c.Save(testKey, testValue, 0)
 
-func (s *FileTestSuite) TestSave() {
-	s.Assert().Nil(s.cache.Save("foo", "bar", 0))
-}
+	if !c.Contains(testKey) {
+		t.Errorf("contains failed: the key %s should be exist", testKey)
+	}
 
-func (s *FileTestSuite) TestFetchThrowError() {
-	key := "foo"
-	value := "bar"
+	_ = c.Save("bar", testValue, 0)
 
-	_ = s.cache.Save(key, value, 0)
+	if values := c.FetchMulti([]string{testKey, "bar"}); len(values) == 0 {
+		t.Errorf("fetch multi failed: expected %d, got %d", 2, len(values))
+	}
 
-	cache := NewFile("./test/")
+	if err := c.Flush(); err != nil {
+		t.Errorf("flush failed: expected nil, got %v", err)
+	}
 
-	result, err := cache.Fetch(key)
+	if c.Contains(testKey) {
+		t.Errorf("contains failed: the key %s should not be exist", testKey)
+	}
 
-	s.Assert().Error(err)
-	s.Assert().Contains(err.Error(), ErrFileOpen)
-	s.Assert().Empty(result)
-}
+	c = NewFile("./test/")
 
-func (s *FileTestSuite) TestFetchThrowErrorWhenExpired() {
-	key := "foo"
-	value := "bar"
+	if err := c.Save(testKey, testValue, 0); err == nil {
+		t.Errorf("save failed: expected an error, got %v", err)
+	}
 
-	_ = s.cache.Save(key, value, 1*time.Second)
+	if _, err := c.Fetch(testKey); err == nil {
+		t.Errorf("fetch failed: expected and error, got %v", err)
+	}
 
-	time.Sleep(1 * time.Second)
-
-	result, err := s.cache.Fetch(key)
-
-	s.Assert().EqualError(err, ErrCacheExpired.Error())
-	s.Assert().Empty(result)
-}
-
-func (s *FileTestSuite) TestFetch() {
-	key := "foo"
-	value := "bar"
-
-	_ = s.cache.Save(key, value, 0)
-	result, err := s.cache.Fetch(key)
-
-	s.Assert().Nil(err)
-	s.Assert().Equal(value, result)
-}
-
-func (s *FileTestSuite) TestFetchLongCacheDuration() {
-	key := "foo"
-	value := "bar"
-
-	_ = s.cache.Save(key, value, 10*time.Second)
-	result, err := s.cache.Fetch(key)
-
-	s.Assert().Nil(err)
-	s.Assert().Equal(value, result)
-}
-
-func (s *FileTestSuite) TestContains() {
-	_ = s.cache.Save("foo", "bar", 0)
-
-	s.Assert().True(s.cache.Contains("foo"))
-	s.Assert().False(s.cache.Contains("bar"))
-}
-
-func (s *FileTestSuite) TestDelete() {
-	_ = s.cache.Save("foo", "bar", 0)
-
-	s.Assert().Nil(s.cache.Delete("foo"))
-	s.Assert().False(s.cache.Contains("foo"))
-	s.Assert().Nil(s.cache.Delete("bar"))
-}
-
-func (s *FileTestSuite) TestFlushReturnFalseWhenThrowError() {
-	cache := NewFile("./test/")
-
-	s.Assert().Error(cache.Flush(), "OK")
-}
-
-func (s *FileTestSuite) TestFlush() {
-	_ = s.cache.Save("foo", "bar", 0)
-
-	s.Assert().Nil(s.cache.Flush())
-	s.Assert().False(s.cache.Contains("foo"))
-}
-
-func (s *FileTestSuite) TestFetchMultiReturnNoItemsWhenThrowError() {
-	cache := NewFile("./test/")
-	result := cache.FetchMulti([]string{"foo"})
-
-	s.Assert().Len(result, 0)
-}
-
-func (s *FileTestSuite) TestFetchMulti() {
-	_ = s.cache.Save("foo", "bar", 0)
-	_ = s.cache.Save("john", "doe", 0)
-
-	result := s.cache.FetchMulti([]string{"foo", "john"})
-
-	s.Assert().Len(result, 2)
-}
-
-func (s *FileTestSuite) TestFetchMultiWhenOnlyOneOfKeysExists() {
-	_ = s.cache.Save("foo", "bar", 0)
-
-	result := s.cache.FetchMulti([]string{"foo", "alice"})
-
-	s.Assert().Len(result, 1)
-}
-
-func TestFileRunSuite(t *testing.T) {
-	suite.Run(t, new(FileTestSuite))
+	if err := c.Flush(); err == nil {
+		t.Errorf("flush failed: expected an error, got %v", err)
+	}
 }
