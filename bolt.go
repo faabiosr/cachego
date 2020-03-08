@@ -41,7 +41,7 @@ type (
 )
 
 // NewBolt creates an instance of BoltDB cache
-func NewBolt(db *bolt.DB) *Bolt {
+func NewBolt(db *bolt.DB) Cache {
 	return &Bolt{db}
 }
 

@@ -20,7 +20,7 @@ type (
 )
 
 // NewSyncMap creates an instance of SyncMap cache driver
-func NewSyncMap() *SyncMap {
+func NewSyncMap() Cache {
 	return &SyncMap{&sync.Map{}}
 }
 

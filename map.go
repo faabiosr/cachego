@@ -19,7 +19,7 @@ type (
 )
 
 // NewMap creates an instance of Map cache driver
-func NewMap() *Map {
+func NewMap() Cache {
 	storage := make(map[string]*MapItem)
 
 	return &Map{storage}

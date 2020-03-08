@@ -26,7 +26,7 @@ type (
 )
 
 // NewFile creates an instance of File cache
-func NewFile(dir string) *File {
+func NewFile(dir string) Cache {
 	return &File{dir}
 }
 

@@ -17,7 +17,7 @@ type (
 )
 
 // NewSqlite3 creates an instance of Sqlite3 cache driver
-func NewSqlite3(db *sql.DB, table string) (*Sqlite3, error) {
+func NewSqlite3(db *sql.DB, table string) (Cache, error) {
 	if err := createTable(db, table); err != nil {
 		return nil, errors.Wrap(err, "Unable to create database table")
 	}

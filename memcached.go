@@ -14,7 +14,7 @@ type (
 )
 
 // NewMemcached creates an instance of Memcached cache driver
-func NewMemcached(driver *memcache.Client) *Memcached {
+func NewMemcached(driver *memcache.Client) Cache {
 	return &Memcached{driver}
 }
 

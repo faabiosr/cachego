@@ -14,7 +14,7 @@ type (
 )
 
 // NewChain creates an instance of Chain cache driver
-func NewChain(drivers ...Cache) *Chain {
+func NewChain(drivers ...Cache) Cache {
 	return &Chain{drivers}
 }
 

@@ -14,7 +14,7 @@ type (
 )
 
 // NewRedis creates an instance of Redis cache driver
-func NewRedis(driver redis.BaseCmdable) *Redis {
+func NewRedis(driver redis.BaseCmdable) Cache {
 	return &Redis{driver}
 }
 

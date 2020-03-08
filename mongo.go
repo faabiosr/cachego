@@ -23,7 +23,7 @@ type (
 )
 
 // NewMongo creates an instance of Mongo cache driver
-func NewMongo(collection *mgo.Collection) *Mongo {
+func NewMongo(collection *mgo.Collection) Cache {
 	return &Mongo{collection}
 }
 
