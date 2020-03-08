@@ -57,7 +57,7 @@ func (s *BoltTestSuite) TestSaveThrowError() {
 	err = cache.Save("foo", "bar", 0)
 
 	s.Assert().Error(err)
-	s.Assert().Contains(err.Error(), ErrBoltSave)
+	s.Assert().Contains(err.Error(), ErrSave)
 }
 
 func (s *BoltTestSuite) TestFetchThrowErrorWhenBucketNotFound() {
@@ -80,7 +80,7 @@ func (s *BoltTestSuite) TestFetchThrowErrorWhenExpired() {
 	result, err := s.cache.Fetch(key)
 
 	s.Assert().Empty(result)
-	s.Assert().EqualError(err, ErrBoltCacheExpired.Error())
+	s.Assert().EqualError(err, ErrCacheExpired.Error())
 }
 
 func (s *BoltTestSuite) TestFetch() {
@@ -132,7 +132,7 @@ func (s *BoltTestSuite) TestFlushThrowErrorWhenBucketNotFound() {
 	err := s.cache.Flush()
 
 	s.Assert().Error(err)
-	s.Assert().Contains(err.Error(), ErrBoltFlush)
+	s.Assert().Contains(err.Error(), ErrFlush)
 }
 
 func (s *BoltTestSuite) TestFlush() {

@@ -1,10 +1,12 @@
 package cachego
 
 import (
-	"errors"
 	"sync"
 	"time"
 )
+
+//ErrSyncMapNotFound returns an error when the key is not found.
+const ErrSyncMapKeyNotFound = err("key not found")
 
 type (
 	// SyncMapItem structure for managing data and lifetime
@@ -28,7 +30,7 @@ func (sm *SyncMap) read(key string) (*SyncMapItem, error) {
 	v, ok := sm.storage.Load(key)
 
 	if !ok {
-		return nil, errors.New("Key not found")
+		return nil, ErrSyncMapKeyNotFound
 	}
 
 	item := v.(*SyncMapItem)
@@ -39,7 +41,7 @@ func (sm *SyncMap) read(key string) (*SyncMapItem, error) {
 
 	if item.duration <= time.Now().Unix() {
 		_ = sm.Delete(key)
-		return nil, errors.New("Cache expired")
+		return nil, ErrCacheExpired
 	}
 
 	return item, nil

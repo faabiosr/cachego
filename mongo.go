@@ -1,7 +1,6 @@
 package cachego
 
 import (
-	"errors"
 	"time"
 
 	"gopkg.in/mgo.v2"
@@ -57,7 +56,7 @@ func (m *Mongo) Fetch(key string) (string, error) {
 
 	if content.Duration <= time.Now().Unix() {
 		_ = m.Delete(key)
-		return "", errors.New("Cache expired")
+		return "", ErrCacheExpired
 	}
 
 	return content.Value, nil

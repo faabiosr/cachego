@@ -8,9 +8,10 @@ import (
 	"os"
 	"path/filepath"
 	"time"
-
-	errors "github.com/pkg/errors"
 )
+
+// ErrFileOpen returns an error when try to open a file.
+const ErrFileOpen = err("unable to open file")
 
 type (
 	// File store for caching data
@@ -48,7 +49,7 @@ func (f *File) read(key string) (*FileContent, error) {
 	)
 
 	if err != nil {
-		return nil, errors.Wrap(err, "Unable to open")
+		return nil, Wrap(ErrFileOpen, err)
 	}
 
 	content := &FileContent{}
@@ -56,7 +57,7 @@ func (f *File) read(key string) (*FileContent, error) {
 	err = json.Unmarshal(value, content)
 
 	if err != nil {
-		return nil, errors.Wrap(err, "Unable to decode json data")
+		return nil, Wrap(ErrDecode, err)
 	}
 
 	if content.Duration == 0 {
@@ -65,7 +66,7 @@ func (f *File) read(key string) (*FileContent, error) {
 
 	if content.Duration <= time.Now().Unix() {
 		_ = f.Delete(key)
-		return nil, errors.New("Cache expired")
+		return nil, ErrCacheExpired
 	}
 
 	return content, nil
@@ -96,7 +97,7 @@ func (f *File) Delete(key string) error {
 	)
 
 	if err != nil {
-		return errors.Wrap(err, "Unable to delete")
+		return Wrap(ErrDelete, err)
 	}
 
 	return nil
@@ -131,7 +132,7 @@ func (f *File) Flush() error {
 	dir, err := os.Open(f.dir)
 
 	if err != nil {
-		return errors.Wrap(err, "Unable to open file")
+		return Wrap(ErrFileOpen, err)
 	}
 
 	defer dir.Close()
@@ -162,11 +163,11 @@ func (f *File) Save(key string, value string, lifeTime time.Duration) error {
 	data, err := json.Marshal(content)
 
 	if err != nil {
-		return errors.Wrap(err, "Unable to encode json data")
+		return Wrap(ErrDecode, err)
 	}
 
 	if err := ioutil.WriteFile(f.createName(key), data, 0666); err != nil {
-		return errors.Wrap(err, "Unable to save")
+		return Wrap(ErrSave, err)
 	}
 
 	return nil

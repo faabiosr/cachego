@@ -25,7 +25,10 @@ func (s *FileTestSuite) SetupTest() {
 func (s *FileTestSuite) TestSaveThrowError() {
 	cache := NewFile("./test/")
 
-	s.Assert().Regexp("^Unable to save", cache.Save("foo", "bar", 0))
+	err := cache.Save("foo", "bar", 0)
+
+	s.Assert().Error(err)
+	s.Assert().Contains(err.Error(), ErrSave)
 }
 
 func (s *FileTestSuite) TestSave() {
@@ -42,7 +45,8 @@ func (s *FileTestSuite) TestFetchThrowError() {
 
 	result, err := cache.Fetch(key)
 
-	s.Assert().Regexp("^Unable to open", err)
+	s.Assert().Error(err)
+	s.Assert().Contains(err.Error(), ErrFileOpen)
 	s.Assert().Empty(result)
 }
 
@@ -56,7 +60,7 @@ func (s *FileTestSuite) TestFetchThrowErrorWhenExpired() {
 
 	result, err := s.cache.Fetch(key)
 
-	s.Assert().EqualError(err, "Cache expired")
+	s.Assert().EqualError(err, ErrCacheExpired.Error())
 	s.Assert().Empty(result)
 }
 

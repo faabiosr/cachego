@@ -1,9 +1,11 @@
 package cachego
 
 import (
-	"errors"
 	"time"
 )
+
+//ErrMapNotFound returns an error when the key is not found.
+const ErrMapKeyNotFound = err("key not found")
 
 type (
 	// MapItem structure for managing data and lifetime
@@ -29,7 +31,7 @@ func (m *Map) read(key string) (*MapItem, error) {
 	item, ok := m.storage[key]
 
 	if !ok {
-		return nil, errors.New("Key not found")
+		return nil, ErrMapKeyNotFound
 	}
 
 	if item.duration == 0 {
@@ -38,7 +40,7 @@ func (m *Map) read(key string) (*MapItem, error) {
 
 	if item.duration <= time.Now().Unix() {
 		_ = m.Delete(key)
-		return nil, errors.New("Cache expired")
+		return nil, ErrCacheExpired
 	}
 
 	return item, nil

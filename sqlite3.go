@@ -4,8 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	"time"
-
-	errors "github.com/pkg/errors"
 )
 
 type (
@@ -19,7 +17,7 @@ type (
 // NewSqlite3 creates an instance of Sqlite3 cache driver
 func NewSqlite3(db *sql.DB, table string) (Cache, error) {
 	if err := createTable(db, table); err != nil {
-		return nil, errors.Wrap(err, "Unable to create database table")
+		return nil, err
 	}
 
 	return &Sqlite3{db, table}, nil
@@ -51,7 +49,7 @@ func (s *Sqlite3) Delete(key string) error {
 	tx, err := s.db.Begin()
 
 	if err != nil {
-		return errors.Wrap(err, "Unable to delete")
+		return Wrap(ErrDelete, err)
 	}
 
 	stmt, err := tx.Prepare(
@@ -59,7 +57,7 @@ func (s *Sqlite3) Delete(key string) error {
 	)
 
 	if err != nil {
-		return errors.Wrap(err, "Unable to delete")
+		return Wrap(ErrDelete, err)
 	}
 
 	defer stmt.Close()
@@ -67,7 +65,7 @@ func (s *Sqlite3) Delete(key string) error {
 	_, err = stmt.Exec(key)
 
 	if err != nil {
-		return errors.Wrap(err, "Unable to delete")
+		return Wrap(ErrDelete, err)
 	}
 
 	_ = tx.Commit()
@@ -82,7 +80,7 @@ func (s *Sqlite3) Fetch(key string) (string, error) {
 	)
 
 	if err != nil {
-		return "", errors.Wrap(err, "Unable to retrieve the value")
+		return "", err
 	}
 
 	defer stmt.Close()
@@ -93,7 +91,7 @@ func (s *Sqlite3) Fetch(key string) (string, error) {
 	err = stmt.QueryRow(key).Scan(&value, &lifetime)
 
 	if err != nil {
-		return "", errors.Wrap(err, "Unable to retrieve the value")
+		return "", err
 	}
 
 	if lifetime == 0 {
@@ -103,7 +101,7 @@ func (s *Sqlite3) Fetch(key string) (string, error) {
 	if lifetime <= time.Now().Unix() {
 		_ = s.Delete(key)
 
-		return "", errors.New("Cache expired")
+		return "", ErrCacheExpired
 	}
 
 	return value, nil
@@ -127,7 +125,7 @@ func (s *Sqlite3) Flush() error {
 	tx, err := s.db.Begin()
 
 	if err != nil {
-		return errors.Wrap(err, "Unable to flush")
+		return Wrap(ErrFlush, err)
 	}
 
 	stmt, err := tx.Prepare(
@@ -135,7 +133,7 @@ func (s *Sqlite3) Flush() error {
 	)
 
 	if err != nil {
-		return errors.Wrap(err, "Unable to flush")
+		return Wrap(ErrFlush, err)
 	}
 
 	defer stmt.Close()
@@ -143,7 +141,7 @@ func (s *Sqlite3) Flush() error {
 	_, err = stmt.Exec()
 
 	if err != nil {
-		return errors.Wrap(err, "Unable to flush")
+		return Wrap(ErrFlush, err)
 	}
 
 	_ = tx.Commit()
@@ -162,7 +160,7 @@ func (s *Sqlite3) Save(key string, value string, lifeTime time.Duration) error {
 	tx, err := s.db.Begin()
 
 	if err != nil {
-		return errors.Wrap(err, "Unable to save")
+		return Wrap(ErrSave, err)
 	}
 
 	stmt, err := tx.Prepare(
@@ -170,7 +168,7 @@ func (s *Sqlite3) Save(key string, value string, lifeTime time.Duration) error {
 	)
 
 	if err != nil {
-		return errors.Wrap(err, "Unable to save")
+		return Wrap(ErrSave, err)
 	}
 
 	defer stmt.Close()
@@ -178,7 +176,7 @@ func (s *Sqlite3) Save(key string, value string, lifeTime time.Duration) error {
 	_, err = stmt.Exec(key, value, duration)
 
 	if err != nil {
-		return errors.Wrap(err, "Unable to save")
+		return Wrap(ErrSave, err)
 	}
 
 	_ = tx.Commit()

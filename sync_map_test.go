@@ -31,8 +31,8 @@ func (s *SyncMapTestSuite) TestFetchThrowErrorWhenExpired() {
 
 	result, err := s.cache.Fetch(key)
 
-	s.Assert().EqualError(err, "Cache expired")
 	s.Assert().Empty(result)
+	s.Assert().EqualError(err, ErrCacheExpired.Error())
 }
 
 func (s *SyncMapTestSuite) TestFetch() {
