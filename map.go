@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-//ErrMapNotFound returns an error when the key is not found.
+//ErrMapKeyNotFound returns an error when the key is not found.
 const ErrMapKeyNotFound = err("key not found")
 
 type (

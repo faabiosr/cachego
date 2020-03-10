@@ -59,7 +59,9 @@ func (s *sqlite3) Delete(key string) error {
 		return Wrap(ErrDelete, err)
 	}
 
-	defer stmt.Close()
+	defer func() {
+		_ = stmt.Close()
+	}()
 
 	_, err = stmt.Exec(key)
 
@@ -82,7 +84,9 @@ func (s *sqlite3) Fetch(key string) (string, error) {
 		return "", err
 	}
 
-	defer stmt.Close()
+	defer func() {
+		_ = stmt.Close()
+	}()
 
 	var value string
 	var lifetime int64
@@ -135,7 +139,9 @@ func (s *sqlite3) Flush() error {
 		return Wrap(ErrFlush, err)
 	}
 
-	defer stmt.Close()
+	defer func() {
+		_ = stmt.Close()
+	}()
 
 	_, err = stmt.Exec()
 
@@ -170,7 +176,9 @@ func (s *sqlite3) Save(key string, value string, lifeTime time.Duration) error {
 		return Wrap(ErrSave, err)
 	}
 
-	defer stmt.Close()
+	defer func() {
+		_ = stmt.Close()
+	}()
 
 	_, err = stmt.Exec(key, value, duration)
 

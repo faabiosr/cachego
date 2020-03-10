@@ -133,12 +133,14 @@ func (f *file) Flush() error {
 		return Wrap(ErrFileOpen, err)
 	}
 
-	defer dir.Close()
+	defer func() {
+		_ = dir.Close()
+	}()
 
 	names, _ := dir.Readdirnames(-1)
 
 	for _, name := range names {
-		os.Remove(filepath.Join(f.dir, name))
+		_ = os.Remove(filepath.Join(f.dir, name))
 	}
 
 	return nil

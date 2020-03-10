@@ -19,7 +19,9 @@ func TestBolt(t *testing.T) {
 		t.Skip(err)
 	}
 
-	defer db.Close()
+	defer func() {
+		_ = db.Close()
+	}()
 
 	c := NewBolt(db)
 
@@ -76,7 +78,9 @@ func TestBoltSaveWithReadOnlyDB(t *testing.T) {
 		t.Skip(err)
 	}
 
-	defer db.Close()
+	defer func() {
+		_ = db.Close()
+	}()
 
 	c := NewBolt(db)
 

@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-//ErrSyncMapNotFound returns an error when the key is not found.
+//ErrSyncMapKeyNotFound returns an error when the key is not found.
 const ErrSyncMapKeyNotFound = err("key not found")
 
 type (

@@ -26,6 +26,7 @@ const (
 	ErrDecode = err("unable to decode")
 )
 
+// Wrap returns a new error that adds additional error as a context.
 func Wrap(err, additionalErr error) error {
 	return fmt.Errorf("%s: %w", additionalErr, err)
 }

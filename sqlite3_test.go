@@ -28,7 +28,9 @@ func TestSqlite3(t *testing.T) {
 		t.Skip(err)
 	}
 
-	defer os.Remove(testDBPath)
+	defer func() {
+		_ = os.Remove(testDBPath)
+	}()
 
 	if err := c.Save(testKey, testValue, 1*time.Nanosecond); err != nil {
 		t.Errorf("save fail: expected nil, got %v", err)
@@ -67,9 +69,11 @@ func TestSqlite3(t *testing.T) {
 
 func TestSqlite3Fail(t *testing.T) {
 	db, _ := sql.Open("sqlite3", testDBPath)
-	db.Close()
+	_ = db.Close()
 
-	defer os.Remove(testDBPath)
+	defer func() {
+		_ = os.Remove(testDBPath)
+	}()
 
 	if _, err := NewSqlite3(db, testTable); err == nil {
 		t.Errorf("constructor failed: expected an error, got %v", err)
@@ -77,7 +81,7 @@ func TestSqlite3Fail(t *testing.T) {
 
 	db, _ = sql.Open("sqlite3", testDBPath)
 	c, _ := NewSqlite3(db, testTable)
-	db.Close()
+	_ = db.Close()
 
 	if err := c.Save(testKey, testValue, 0); err == nil {
 		t.Errorf("save failed: expected an error, got %v", err)
