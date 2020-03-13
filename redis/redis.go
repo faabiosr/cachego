@@ -1,8 +1,9 @@
-package cachego
+package redis
 
 import (
 	"time"
 
+	"github.com/faabiosr/cachego"
 	rd "gopkg.in/redis.v4"
 )
 
@@ -12,10 +13,8 @@ type (
 	}
 )
 
-// NewRedis creates an instance of Redis cache driver
-//
-// Deprecated: Use redis.New instead.
-func NewRedis(driver rd.BaseCmdable) Cache {
+// New creates an instance of Redis cache driver
+func New(driver rd.BaseCmdable) cachego.Cache {
 	return &redis{driver}
 }
 

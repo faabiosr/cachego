@@ -1,4 +1,4 @@
 *.swp
 *.swo
 cover*
-cache-dir/*
+cache-dir

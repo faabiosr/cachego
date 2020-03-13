@@ -1,9 +1,10 @@
-package cachego
+package memcached
 
 import (
 	"time"
 
 	"github.com/bradfitz/gomemcache/memcache"
+	"github.com/faabiosr/cachego"
 )
 
 type (
@@ -12,10 +13,8 @@ type (
 	}
 )
 
-// NewMemcached creates an instance of Memcached cache driver
-//
-// Deprecated: Use memcached.New instead.
-func NewMemcached(driver *memcache.Client) Cache {
+// New creates an instance of Memcached cache driver
+func New(driver *memcache.Client) cachego.Cache {
 	return &memcached{driver}
 }
 
@@ -41,9 +40,7 @@ func (m *memcached) Fetch(key string) (string, error) {
 		return "", err
 	}
 
-	value := string(item.Value[:])
-
-	return value, nil
+	return string(item.Value[:]), nil
 }
 
 // FetchMulti retrieves multiple cached value from keys of the Memcached storage
@@ -70,13 +67,11 @@ func (m *memcached) Flush() error {
 
 // Save a value in Memcached storage by key
 func (m *memcached) Save(key string, value string, lifeTime time.Duration) error {
-	err := m.driver.Set(
+	return m.driver.Set(
 		&memcache.Item{
 			Key:        key,
 			Value:      []byte(value),
 			Expiration: int32(lifeTime.Seconds()),
 		},
 	)
-
-	return err
 }

@@ -1,8 +1,10 @@
-package cachego
+package mongo
 
 import (
+	"errors"
 	"time"
 
+	"github.com/faabiosr/cachego"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -19,10 +21,8 @@ type (
 	}
 )
 
-// NewMongo creates an instance of Mongo cache driver
-//
-// Deprecated: Use mongo.New instead.
-func NewMongo(collection *mgo.Collection) Cache {
+// New creates an instance of Mongo cache driver
+func New(collection *mgo.Collection) cachego.Cache {
 	return &mongo{collection}
 }
 
@@ -56,7 +56,7 @@ func (m *mongo) Fetch(key string) (string, error) {
 
 	if content.Duration <= time.Now().Unix() {
 		_ = m.Delete(key)
-		return "", ErrCacheExpired
+		return "", errors.New("cache expired")
 	}
 
 	return content.Value, nil

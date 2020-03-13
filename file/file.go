@@ -1,17 +1,18 @@
-package cachego
+package file
 
 import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"time"
-)
 
-// ErrFileOpen returns an error when try to open a file.
-const ErrFileOpen = err("unable to open file")
+	"github.com/faabiosr/cachego"
+)
 
 type (
 	file struct {
@@ -24,10 +25,8 @@ type (
 	}
 )
 
-// NewFile creates an instance of File cache
-//
-// Deprecated: Use file.New instead.
-func NewFile(dir string) Cache {
+// New creates an instance of File cache
+func New(dir string) cachego.Cache {
 	return &file{dir}
 }
 
@@ -36,9 +35,7 @@ func (f *file) createName(key string) string {
 	_, _ = h.Write([]byte(key))
 	hash := hex.EncodeToString(h.Sum(nil))
 
-	filename := hash + ".cachego"
-
-	filePath := filepath.Join(f.dir, filename)
+	filePath := filepath.Join(f.dir, fmt.Sprintf("%s.cachego", hash))
 
 	return filePath
 }
@@ -49,15 +46,13 @@ func (f *file) read(key string) (*fileContent, error) {
 	)
 
 	if err != nil {
-		return nil, Wrap(ErrFileOpen, err)
+		return nil, err
 	}
 
 	content := &fileContent{}
 
-	err = json.Unmarshal(value, content)
-
-	if err != nil {
-		return nil, Wrap(ErrDecode, err)
+	if err := json.Unmarshal(value, content); err != nil {
+		return nil, err
 	}
 
 	if content.Duration == 0 {
@@ -66,7 +61,7 @@ func (f *file) read(key string) (*fileContent, error) {
 
 	if content.Duration <= time.Now().Unix() {
 		_ = f.Delete(key)
-		return nil, ErrCacheExpired
+		return nil, errors.New("cache expired")
 	}
 
 	return content, nil
@@ -74,7 +69,6 @@ func (f *file) read(key string) (*fileContent, error) {
 
 // Contains checks if the cached key exists into the File storage
 func (f *file) Contains(key string) bool {
-
 	if _, err := f.read(key); err != nil {
 		return false
 	}
@@ -92,15 +86,7 @@ func (f *file) Delete(key string) error {
 		return nil
 	}
 
-	err = os.Remove(
-		f.createName(key),
-	)
-
-	if err != nil {
-		return Wrap(ErrDelete, err)
-	}
-
-	return nil
+	return os.Remove(f.createName(key))
 }
 
 // Fetch retrieves the cached value from key of the File storage
@@ -132,7 +118,7 @@ func (f *file) Flush() error {
 	dir, err := os.Open(f.dir)
 
 	if err != nil {
-		return Wrap(ErrFileOpen, err)
+		return err
 	}
 
 	defer func() {
@@ -150,7 +136,6 @@ func (f *file) Flush() error {
 
 // Save a value in File storage by key
 func (f *file) Save(key string, value string, lifeTime time.Duration) error {
-
 	duration := int64(0)
 
 	if lifeTime > 0 {
@@ -165,12 +150,8 @@ func (f *file) Save(key string, value string, lifeTime time.Duration) error {
 	data, err := json.Marshal(content)
 
 	if err != nil {
-		return Wrap(ErrDecode, err)
+		return err
 	}
 
-	if err := ioutil.WriteFile(f.createName(key), data, 0666); err != nil {
-		return Wrap(ErrSave, err)
-	}
-
-	return nil
+	return ioutil.WriteFile(f.createName(key), data, 0666)
 }

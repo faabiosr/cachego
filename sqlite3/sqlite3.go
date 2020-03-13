@@ -1,9 +1,12 @@
-package cachego
+package sqlite3
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"time"
+
+	"github.com/faabiosr/cachego"
 )
 
 type (
@@ -13,10 +16,8 @@ type (
 	}
 )
 
-// NewSqlite3 creates an instance of Sqlite3 cache driver
-//
-// Deprecated: Use sqlite3.New instead.
-func NewSqlite3(db *sql.DB, table string) (Cache, error) {
+// New creates an instance of Sqlite3 cache driver
+func New(db *sql.DB, table string) (cachego.Cache, error) {
 	if err := createTable(db, table); err != nil {
 		return nil, err
 	}
@@ -50,7 +51,7 @@ func (s *sqlite3) Delete(key string) error {
 	tx, err := s.db.Begin()
 
 	if err != nil {
-		return Wrap(ErrDelete, err)
+		return err
 	}
 
 	stmt, err := tx.Prepare(
@@ -58,22 +59,18 @@ func (s *sqlite3) Delete(key string) error {
 	)
 
 	if err != nil {
-		return Wrap(ErrDelete, err)
+		return err
 	}
 
 	defer func() {
 		_ = stmt.Close()
 	}()
 
-	_, err = stmt.Exec(key)
-
-	if err != nil {
-		return Wrap(ErrDelete, err)
+	if _, err := stmt.Exec(key); err != nil {
+		return err
 	}
 
-	_ = tx.Commit()
-
-	return nil
+	return tx.Commit()
 }
 
 // Fetch retrieves the cached value from key of the Sqlite3 storage
@@ -93,9 +90,7 @@ func (s *sqlite3) Fetch(key string) (string, error) {
 	var value string
 	var lifetime int64
 
-	err = stmt.QueryRow(key).Scan(&value, &lifetime)
-
-	if err != nil {
+	if err := stmt.QueryRow(key).Scan(&value, &lifetime); err != nil {
 		return "", err
 	}
 
@@ -106,7 +101,7 @@ func (s *sqlite3) Fetch(key string) (string, error) {
 	if lifetime <= time.Now().Unix() {
 		_ = s.Delete(key)
 
-		return "", ErrCacheExpired
+		return "", errors.New("cache expired")
 	}
 
 	return value, nil
@@ -130,7 +125,7 @@ func (s *sqlite3) Flush() error {
 	tx, err := s.db.Begin()
 
 	if err != nil {
-		return Wrap(ErrFlush, err)
+		return err
 	}
 
 	stmt, err := tx.Prepare(
@@ -138,22 +133,18 @@ func (s *sqlite3) Flush() error {
 	)
 
 	if err != nil {
-		return Wrap(ErrFlush, err)
+		return err
 	}
 
 	defer func() {
 		_ = stmt.Close()
 	}()
 
-	_, err = stmt.Exec()
-
-	if err != nil {
-		return Wrap(ErrFlush, err)
+	if _, err := stmt.Exec(); err != nil {
+		return err
 	}
 
-	_ = tx.Commit()
-
-	return nil
+	return tx.Commit()
 }
 
 // Save a value in Sqlite3 storage by key
@@ -167,7 +158,7 @@ func (s *sqlite3) Save(key string, value string, lifeTime time.Duration) error {
 	tx, err := s.db.Begin()
 
 	if err != nil {
-		return Wrap(ErrSave, err)
+		return err
 	}
 
 	stmt, err := tx.Prepare(
@@ -175,20 +166,16 @@ func (s *sqlite3) Save(key string, value string, lifeTime time.Duration) error {
 	)
 
 	if err != nil {
-		return Wrap(ErrSave, err)
+		return err
 	}
 
 	defer func() {
 		_ = stmt.Close()
 	}()
 
-	_, err = stmt.Exec(key, value, duration)
-
-	if err != nil {
-		return Wrap(ErrSave, err)
+	if _, err := stmt.Exec(key, value, duration); err != nil {
+		return err
 	}
 
-	_ = tx.Commit()
-
-	return nil
+	return tx.Commit()
 }

@@ -1,16 +1,15 @@
-package cachego
+package bolt
 
 import (
 	"encoding/json"
+	"errors"
 	"time"
 
 	bt "github.com/coreos/bbolt"
+	"github.com/faabiosr/cachego"
 )
 
 var boltBucket = []byte("cachego")
-
-// ErrBoltBucketNotFound returns an error when bucket not found
-const ErrBoltBucketNotFound = err("Bucket not found")
 
 type (
 	bolt struct {
@@ -23,10 +22,8 @@ type (
 	}
 )
 
-// NewBolt creates an instance of BoltDB cache
-//
-// Deprecated: Use bolt.New instead.
-func NewBolt(db *bt.DB) Cache {
+// New creates an instance of BoltDB cache
+func New(db *bt.DB) cachego.Cache {
 	return &bolt{db}
 }
 
@@ -37,7 +34,7 @@ func (b *bolt) read(key string) (*boltContent, error) {
 		bucket := tx.Bucket(boltBucket)
 
 		if bucket == nil {
-			return ErrBoltBucketNotFound
+			return errors.New("bucket not found")
 		}
 
 		value = bucket.Get([]byte(key))
@@ -54,7 +51,7 @@ func (b *bolt) read(key string) (*boltContent, error) {
 	err = json.Unmarshal(value, content)
 
 	if err != nil {
-		return nil, Wrap(ErrDecode, err)
+		return nil, err
 	}
 
 	if content.Duration == 0 {
@@ -63,7 +60,7 @@ func (b *bolt) read(key string) (*boltContent, error) {
 
 	if content.Duration <= time.Now().Unix() {
 		_ = b.Delete(key)
-		return nil, ErrCacheExpired
+		return nil, errors.New("cache expired")
 	}
 
 	return content, err
@@ -84,7 +81,7 @@ func (b *bolt) Delete(key string) error {
 		bucket := tx.Bucket(boltBucket)
 
 		if bucket == nil {
-			return ErrBoltBucketNotFound
+			return errors.New("bucket not found")
 		}
 
 		return bucket.Delete([]byte(key))
@@ -123,7 +120,7 @@ func (b *bolt) Flush() error {
 		err := tx.DeleteBucket(boltBucket)
 
 		if err != nil {
-			return Wrap(ErrFlush, err)
+			return err
 		}
 
 		return err
@@ -148,7 +145,7 @@ func (b *bolt) Save(key string, value string, lifeTime time.Duration) error {
 	data, err := json.Marshal(content)
 
 	if err != nil {
-		return Wrap(ErrDecode, err)
+		return err
 	}
 
 	err = b.db.Update(func(tx *bt.Tx) error {
@@ -162,7 +159,7 @@ func (b *bolt) Save(key string, value string, lifeTime time.Duration) error {
 	})
 
 	if err != nil {
-		return Wrap(ErrSave, err)
+		return err
 	}
 
 	return nil
