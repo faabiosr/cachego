@@ -1,7 +1,5 @@
 package cachego
 
-import "fmt"
-
 type err string
 
 // Error returns the string error value.
@@ -25,8 +23,3 @@ const (
 	// ErrDecode returns an errors when decode fails.
 	ErrDecode = err("unable to decode")
 )
-
-// Wrap returns a new error that adds additional error as a context.
-func Wrap(err, additionalErr error) error {
-	return fmt.Errorf("%s: %w", additionalErr, err)
-}
