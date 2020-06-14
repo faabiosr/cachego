@@ -2,7 +2,7 @@
 
 [![Build Status](https://img.shields.io/travis/faabiosr/cachego/master.svg?style=flat-square)](https://travis-ci.org/faabiosr/cachego)
 [![Codecov branch](https://img.shields.io/codecov/c/github/faabiosr/cachego/master.svg?style=flat-square)](https://codecov.io/gh/faabiosr/cachego)
-[![GoDoc](https://img.shields.io/badge/godoc-reference-5272B4.svg?style=flat-square)](https://godoc.org/github.com/faabiosr/cachego)
+[![GoDoc](https://img.shields.io/badge/godoc-reference-5272B4.svg?style=flat-square)](https://pkg.go.dev/github.com/faabiosr/cachego)
 [![Go Report Card](https://goreportcard.com/badge/github.com/faabiosr/cachego?style=flat-square)](https://goreportcard.com/report/github.com/faabiosr/cachego)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://github.com/faabiosr/cachego/blob/master/LICENSE)
 
@@ -10,237 +10,81 @@ Simple interface for caching
 
 ## Installation
 
-Cachego requires Go 1.9 or later.
+Cachego requires Go 1.13 or later.
 
 ```
 go get github.com/faabiosr/cachego
 ```
 
-If you want to get an specific version, please use the example below:
-
-```
-go get gopkg.in/faabiosr/cachego.v0
-```
-
-## Usage Examples
-
-### Memcached
+## Usage
 
 ```go
 package main
 
 import (
-    "github.com/faabiosr/cachego"
-    "github.com/bradfitz/gomemcache/memcache"
-)
+	"log"
+	"time"
 
-var cache cachego.Cache
-
-func init() {
-    cache = cachego.NewMemcached(memcached.New("localhost:11211"))
-}
-```
-
-### Redis
-
-```go
-package main
-
-import (
-    "github.com/faabiosr/cachego"
-    "gopkg.in/redis.v4"
-)
-
-var cache cachego.Cache
-
-func init() {
-    cache = cachego.NewRedis(
-        redis.NewClient(&redis.Options{
-            Addr: ":6379",
-        }),
-    )
-}
-```
-
-### File
-
-```go
-package main
-
-import (
-    "github.com/faabiosr/cachego"
-)
-
-var cache cachego.Cache
-
-func init() {
-    cache = cachego.NewFile(
-        "/cache-dir/",
-    )
-}
-```
-
-### Map
-
-```go
-package main
-
-import (
-    "github.com/faabiosr/cachego"
-)
-
-var cache cachego.Cache
-
-func init() {
-    cache = NewMap()
-}
-```
-
-### MongoDB
-
-```go
-package main
-
-import (
-    "github.com/faabiosr/cachego"
-    "gopkg.in/mgo.v2"
-)
-
-var cache cachego.Cache
-
-func init() {
-    session, _ := mgo.Dial(address)
-
-    cache = cachego.NewMongo(
-        session.DB("cache").C("cache"),
-    )
-}
-```
-
-### Sqlite3
-
-```go
-package main
-
-import (
-	"database/sql"
-	_ "github.com/mattn/go-sqlite3"
-)
-
-var cache cachego.Cache
-
-func init() {
-	db, _ := sql.Open("sqlite3", "./cache.db")
-
-	cache, _ = NewSqlite3(db, "cache")
-}
-```
-
-### SyncMap
-
-```go
-package main
-
-import (
-    "github.com/faabiosr/cachego"
-)
-
-var cache cachego.Cache
-
-func init() {
-    cache = NewSyncMap()
-}
-```
-
-### BoltDB
-
-```go
-package main
-
-import (
-    "github.com/faabiosr/cachego"
-    bolt "github.com/coreos/bbolt"
-)
-
-var cache cachego.Cache
-
-func init() {
-    db, _ := bolt.Open("cache.db", 0600, nil)
-    cache = NewBolt(db)
-}
-```
-
-### Chain
-
-```go
-package main
-
-import (
-    "github.com/faabiosr/cachego"
-)
-
-var cache cachego.Cache
-
-func init() {
-    memcached := cachego.NewMemcached(
-        memcached.New("localhost:11211"),
-    )
-
-    redis := cachego.NewRedis(
-        redis.NewClient(&redis.Options{
-            Addr: ":6379",
-        }),
-    )
-
-    file := cachego.NewFile(
-        "/cache-dir/"
-    )
-
-    cache = cachego.NewChain(
-        cachego.NewMap(),
-        memcached,
-        redis,
-        file,
-    )
-}
-```
-
-### Usage
-
-```go
-package main
-
-import (
-    "github.com/faabiosr/cachego"
-    "github.com/bradfitz/gomemcache/memcache"
+	"github.com/faabiosr/cachego/sync"
 )
 
 func main() {
-    cache.Save("foo", "bar")
-    cache.Save("john", "doe")
+	cache := sync.New()
 
-    value, err := cache.Fetch("foo")
+	if err := cache.Save("user_id", "1", 10*time.Second); err != nil {
+		log.Fatal(err)
+	}
 
-    multiple := cache.FetchMulti([]string{"foo", "john"})
+	id, err := cache.Fetch("user_id")
+	if err != nil {
+		log.Fatal(err)
+	}
 
-    if cache.Contains("foo") {
-        cache.Delete("foo")
-    }
+	log.Printf("user id: %s \n", id)
 
-    cache.Flush()
+	keys := cache.FetchMulti([]string{"user_id", "user_name"})
+
+	for k, v := range keys {
+		log.Printf("%s: %s\n", k, v)
+	}
+
+	if cache.Contains("user_name") {
+		cache.Delete("user_name")
+	}
+
+	if _, err := cache.Fetch("user_name"); err != nil {
+		log.Printf("%v\n", err)
+	}
+
+	if err := cache.Flush(); err != nil {
+		log.Fatal(err)
+	}
 }
+
 ```
+
+## Supported drivers
+
+- [Bolt](/bolt)
+- [Chain](/chain)
+- [File](/file)
+- [Memcached](/memcached)
+- [Mongo](/mongo)
+- [Redis](/redis)
+- [Sqlite3](/sqlite3)
+- [Sync](/sync)
+
 
 ## Documentation
 
-Read the full documentation at [https://godoc.org/github.com/faabiosr/cachego](https://godoc.org/github.com/faabiosr/cachego).
+Read the full documentation at [https://pkg.go.dev/github.com/faabiosr/cachego](https://pkg.go.dev/github.com/faabiosr/cachego).
 
 ## Development
 
 ### Requirements
 
-- Install [docker](https://docs.docker.com/install/) and [docker-compose](https://docs.docker.com/compose/install/)
-- Install [go dep](https://github.com/golang/dep)
+- Install [docker](https://docs.docker.com/install/)
+- Install [docker-compose](https://docs.docker.com/compose/install/)
 
 ### Makefile
 ```sh
@@ -248,19 +92,19 @@ Read the full documentation at [https://godoc.org/github.com/faabiosr/cachego](h
 $ make clean
 
 //Run tests and generates html coverage file
-make cover
+$ make cover
 
 // Up the docker containers for testing
-make docker
+$ make docker
 
 // Format all go files
-make fmt
+$ make fmt
 
 //Run linters
-make lint
+$ make lint
 
 // Run tests
-make test
+$ make test
 ```
 
 ## License
