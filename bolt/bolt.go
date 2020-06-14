@@ -5,7 +5,8 @@ import (
 	"errors"
 	"time"
 
-	bt "github.com/coreos/bbolt"
+	bt "go.etcd.io/bbolt"
+
 	"github.com/faabiosr/cachego"
 )
 

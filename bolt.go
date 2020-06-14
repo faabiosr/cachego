@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"time"
 
-	bt "github.com/coreos/bbolt"
+	bt "go.etcd.io/bbolt"
 )
 
 var boltBucket = []byte("cachego")

@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	bt "github.com/coreos/bbolt"
+	bt "go.etcd.io/bbolt"
 )
 
 func TestBolt(t *testing.T) {
