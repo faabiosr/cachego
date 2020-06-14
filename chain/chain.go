@@ -1,19 +1,20 @@
-package cachego
+package chain
 
 import (
+	"errors"
 	"time"
+
+	"github.com/faabiosr/cachego"
 )
 
 type (
 	chain struct {
-		drivers []Cache
+		drivers []cachego.Cache
 	}
 )
 
-// NewChain creates an instance of Chain cache driver
-//
-// Deprecated: Use chain.New instead.
-func NewChain(drivers ...Cache) Cache {
+// New creates an instance of Chain cache driver
+func New(drivers ...cachego.Cache) cachego.Cache {
 	return &chain{drivers}
 }
 
@@ -49,7 +50,7 @@ func (c *chain) Fetch(key string) (string, error) {
 		}
 	}
 
-	return "", err("key not found in cache chain")
+	return "", errors.New("key not found in cache chain")
 }
 
 // FetchMulti retrieves multiple cached values from one of the registred cache storages

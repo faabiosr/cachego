@@ -1,12 +1,12 @@
-package cachego
+package sync
 
 import (
+	"errors"
 	"sync"
 	"time"
-)
 
-//ErrSyncMapKeyNotFound returns an error when the key is not found.
-const ErrSyncMapKeyNotFound = err("key not found")
+	"github.com/faabiosr/cachego"
+)
 
 type (
 	syncMapItem struct {
@@ -19,10 +19,8 @@ type (
 	}
 )
 
-// NewSyncMap creates an instance of SyncMap cache driver
-//
-// Deprecated: Use sync.New instead.
-func NewSyncMap() Cache {
+// New creates an instance of SyncMap cache driver
+func New() cachego.Cache {
 	return &syncMap{&sync.Map{}}
 }
 
@@ -30,7 +28,7 @@ func (sm *syncMap) read(key string) (*syncMapItem, error) {
 	v, ok := sm.storage.Load(key)
 
 	if !ok {
-		return nil, ErrSyncMapKeyNotFound
+		return nil, errors.New("key not found")
 	}
 
 	item := v.(*syncMapItem)
@@ -41,7 +39,7 @@ func (sm *syncMap) read(key string) (*syncMapItem, error) {
 
 	if item.duration <= time.Now().Unix() {
 		_ = sm.Delete(key)
-		return nil, ErrCacheExpired
+		return nil, cachego.ErrCacheExpired
 	}
 
 	return item, nil
