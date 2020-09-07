@@ -2,6 +2,7 @@ package bolt
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"testing"
 	"time"
@@ -15,17 +16,20 @@ const (
 )
 
 func TestBolt(t *testing.T) {
-	dir := "./cache-dir"
-	_ = os.Mkdir(dir, 0777)
+	dir, err := ioutil.TempDir("", t.Name())
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	db, err := bt.Open(fmt.Sprintf("%s/cachego.db", dir), 0600, nil)
 	if err != nil {
-		t.Skip(err)
+		t.Fatal(err)
 	}
 
-	defer func() {
+	t.Cleanup(func() {
 		_ = db.Close()
-	}()
+		_ = os.RemoveAll(dir)
+	})
 
 	c := New(db)
 
@@ -69,25 +73,5 @@ func TestBolt(t *testing.T) {
 
 	if c.Contains(testKey) {
 		t.Errorf("contains failed: the key %s should not be exist", testKey)
-	}
-}
-
-func TestBoltSaveWithReadOnlyDB(t *testing.T) {
-	dir := "./cache-dir"
-	_ = os.Mkdir(dir, 0777)
-
-	db, err := bt.Open(fmt.Sprintf("%s/cachego.db", dir), 0666, &bt.Options{ReadOnly: true})
-	if err != nil {
-		t.Skip(err)
-	}
-
-	defer func() {
-		_ = db.Close()
-	}()
-
-	c := New(db)
-
-	if err := c.Save(testKey, testValue, 0); err == nil {
-		t.Errorf("save failed: expected error, got %v", err)
 	}
 }

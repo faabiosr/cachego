@@ -20,11 +20,7 @@ func New(driver rd.BaseCmdable) cachego.Cache {
 
 // Contains checks if cached key exists in Redis storage
 func (r *redis) Contains(key string) bool {
-	status, err := r.driver.Exists(key).Result()
-	if err != nil {
-		return false
-	}
-
+	status, _ := r.driver.Exists(key).Result()
 	return status
 }
 
@@ -35,12 +31,7 @@ func (r *redis) Delete(key string) error {
 
 // Fetch retrieves the cached value from key of the Redis storage
 func (r *redis) Fetch(key string) (string, error) {
-	value, err := r.driver.Get(key).Result()
-	if err != nil {
-		return "", err
-	}
-
-	return value, nil
+	return r.driver.Get(key).Result()
 }
 
 // FetchMulti retrieves multiple cached value from keys of the Redis storage

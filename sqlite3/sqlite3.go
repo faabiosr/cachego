@@ -18,11 +18,7 @@ type (
 
 // New creates an instance of Sqlite3 cache driver
 func New(db *sql.DB, table string) (cachego.Cache, error) {
-	if err := createTable(db, table); err != nil {
-		return nil, err
-	}
-
-	return &sqlite3{db, table}, nil
+	return &sqlite3{db, table}, createTable(db, table)
 }
 
 func createTable(db *sql.DB, table string) error {
@@ -33,17 +29,13 @@ func createTable(db *sql.DB, table string) error {
     );`
 
 	_, err := db.Exec(fmt.Sprintf(stmt, table))
-
 	return err
 }
 
 // Contains checks if cached key exists in Sqlite3 storage
 func (s *sqlite3) Contains(key string) bool {
-	if _, err := s.Fetch(key); err != nil {
-		return false
-	}
-
-	return true
+	_, err := s.Fetch(key)
+	return err == nil
 }
 
 // Delete the cached key from Sqlite3 storage
@@ -53,9 +45,10 @@ func (s *sqlite3) Delete(key string) error {
 		return err
 	}
 
-	stmt, err := tx.Prepare(
-		fmt.Sprintf("DELETE FROM %s WHERE key = ?", s.table),
-	)
+	stmt, err := tx.Prepare(fmt.Sprintf(`
+		DELETE FROM %s
+		WHERE key = ?
+	`, s.table))
 	if err != nil {
 		return err
 	}
@@ -65,6 +58,7 @@ func (s *sqlite3) Delete(key string) error {
 	}()
 
 	if _, err := stmt.Exec(key); err != nil {
+		_ = tx.Rollback()
 		return err
 	}
 
@@ -73,9 +67,10 @@ func (s *sqlite3) Delete(key string) error {
 
 // Fetch retrieves the cached value from key of the Sqlite3 storage
 func (s *sqlite3) Fetch(key string) (string, error) {
-	stmt, err := s.db.Prepare(
-		fmt.Sprintf("SELECT value, lifetime FROM %s WHERE key = ?", s.table),
-	)
+	stmt, err := s.db.Prepare(fmt.Sprintf(`
+		SELECT value, lifetime
+		FROM %s WHERE key = ?
+	`, s.table))
 	if err != nil {
 		return "", err
 	}
@@ -97,7 +92,6 @@ func (s *sqlite3) Fetch(key string) (string, error) {
 
 	if lifetime <= time.Now().Unix() {
 		_ = s.Delete(key)
-
 		return "", errors.New("cache expired")
 	}
 
@@ -124,9 +118,7 @@ func (s *sqlite3) Flush() error {
 		return err
 	}
 
-	stmt, err := tx.Prepare(
-		fmt.Sprintf("DELETE FROM %s", s.table),
-	)
+	stmt, err := tx.Prepare(fmt.Sprintf("DELETE FROM %s", s.table))
 	if err != nil {
 		return err
 	}
@@ -136,6 +128,7 @@ func (s *sqlite3) Flush() error {
 	}()
 
 	if _, err := stmt.Exec(); err != nil {
+		_ = tx.Rollback()
 		return err
 	}
 
@@ -155,9 +148,10 @@ func (s *sqlite3) Save(key string, value string, lifeTime time.Duration) error {
 		return err
 	}
 
-	stmt, err := tx.Prepare(
-		fmt.Sprintf("INSERT OR REPLACE INTO %s (key, value, lifetime) VALUES (?, ?, ?)", s.table),
-	)
+	stmt, err := tx.Prepare(fmt.Sprintf(`
+		INSERT OR REPLACE INTO %s (key, value, lifetime)
+		VALUES (?, ?, ?)
+	`, s.table))
 	if err != nil {
 		return err
 	}
@@ -167,6 +161,7 @@ func (s *sqlite3) Save(key string, value string, lifeTime time.Duration) error {
 	}()
 
 	if _, err := stmt.Exec(key, value, duration); err != nil {
+		_ = tx.Rollback()
 		return err
 	}
 

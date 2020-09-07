@@ -28,11 +28,8 @@ func New(collection *mgo.Collection) cachego.Cache {
 
 // Contains checks if cached key exists in Mongo storage
 func (m *mongo) Contains(key string) bool {
-	if _, err := m.Fetch(key); err != nil {
-		return false
-	}
-
-	return true
+	_, err := m.Fetch(key)
+	return err == nil
 }
 
 // Delete the cached key from Mongo storage
@@ -44,8 +41,7 @@ func (m *mongo) Delete(key string) error {
 func (m *mongo) Fetch(key string) (string, error) {
 	content := &mongoContent{}
 
-	err := m.collection.Find(bson.M{"_id": key}).One(content)
-	if err != nil {
+	if err := m.collection.Find(bson.M{"_id": key}).One(content); err != nil {
 		return "", err
 	}
 
@@ -64,9 +60,7 @@ func (m *mongo) Fetch(key string) (string, error) {
 // FetchMulti retrieves multiple cached value from keys of the Mongo storage
 func (m *mongo) FetchMulti(keys []string) map[string]string {
 	result := make(map[string]string)
-
 	iter := m.collection.Find(bson.M{"_id": bson.M{"$in": keys}}).Iter()
-
 	content := &mongoContent{}
 
 	for iter.Next(content) {
@@ -79,7 +73,6 @@ func (m *mongo) FetchMulti(keys []string) map[string]string {
 // Flush removes all cached keys of the Mongo storage
 func (m *mongo) Flush() error {
 	_, err := m.collection.RemoveAll(bson.M{})
-
 	return err
 }
 
@@ -91,15 +84,8 @@ func (m *mongo) Save(key string, value string, lifeTime time.Duration) error {
 		duration = time.Now().Unix() + int64(lifeTime.Seconds())
 	}
 
-	content := &mongoContent{
-		duration,
-		key,
-		value,
-	}
+	content := &mongoContent{duration, key, value}
 
-	if _, err := m.collection.Upsert(bson.M{"_id": key}, content); err != nil {
-		return err
-	}
-
-	return nil
+	_, err := m.collection.Upsert(bson.M{"_id": key}, content)
+	return err
 }

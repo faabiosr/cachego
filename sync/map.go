@@ -26,7 +26,6 @@ func New() cachego.Cache {
 
 func (sm *syncMap) read(key string) (*syncMapItem, error) {
 	v, ok := sm.storage.Load(key)
-
 	if !ok {
 		return nil, errors.New("key not found")
 	}
@@ -47,11 +46,8 @@ func (sm *syncMap) read(key string) (*syncMapItem, error) {
 
 // Contains checks if cached key exists in SyncMap storage
 func (sm *syncMap) Contains(key string) bool {
-	if _, err := sm.Fetch(key); err != nil {
-		return false
-	}
-
-	return true
+	_, err := sm.Fetch(key)
+	return err == nil
 }
 
 // Delete the cached key from SyncMap storage
@@ -97,9 +93,6 @@ func (sm *syncMap) Save(key string, value string, lifeTime time.Duration) error 
 		duration = time.Now().Unix() + int64(lifeTime.Seconds())
 	}
 
-	item := &syncMapItem{value, duration}
-
-	sm.storage.Store(key, item)
-
+	sm.storage.Store(key, &syncMapItem{value, duration})
 	return nil
 }

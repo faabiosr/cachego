@@ -7,11 +7,9 @@ import (
 	"github.com/faabiosr/cachego"
 )
 
-type (
-	memcached struct {
-		driver *memcache.Client
-	}
-)
+type memcached struct {
+	driver *memcache.Client
+}
 
 // New creates an instance of Memcached cache driver
 func New(driver *memcache.Client) cachego.Cache {
@@ -20,11 +18,8 @@ func New(driver *memcache.Client) cachego.Cache {
 
 // Contains checks if cached key exists in Memcached storage
 func (m *memcached) Contains(key string) bool {
-	if _, err := m.Fetch(key); err != nil {
-		return false
-	}
-
-	return true
+	_, err := m.Fetch(key)
+	return err == nil
 }
 
 // Delete the cached key from Memcached storage

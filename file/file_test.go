@@ -1,7 +1,7 @@
 package file
 
 import (
-	"os"
+	"io/ioutil"
 	"testing"
 	"time"
 )
@@ -12,9 +12,10 @@ const (
 )
 
 func TestFile(t *testing.T) {
-	dir := "./cache-dir/"
-
-	_ = os.Mkdir(dir, 0777)
+	dir, err := ioutil.TempDir("", t.Name())
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	c := New(dir)
 

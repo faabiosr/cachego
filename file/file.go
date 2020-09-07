@@ -35,21 +35,16 @@ func (f *file) createName(key string) string {
 	_, _ = h.Write([]byte(key))
 	hash := hex.EncodeToString(h.Sum(nil))
 
-	filePath := filepath.Join(f.dir, fmt.Sprintf("%s.cachego", hash))
-
-	return filePath
+	return filepath.Join(f.dir, fmt.Sprintf("%s.cachego", hash))
 }
 
 func (f *file) read(key string) (*fileContent, error) {
-	value, err := ioutil.ReadFile(
-		f.createName(key),
-	)
+	value, err := ioutil.ReadFile(f.createName(key))
 	if err != nil {
 		return nil, err
 	}
 
 	content := &fileContent{}
-
 	if err := json.Unmarshal(value, content); err != nil {
 		return nil, err
 	}
@@ -68,19 +63,13 @@ func (f *file) read(key string) (*fileContent, error) {
 
 // Contains checks if the cached key exists into the File storage
 func (f *file) Contains(key string) bool {
-	if _, err := f.read(key); err != nil {
-		return false
-	}
-
-	return true
+	_, err := f.read(key)
+	return err == nil
 }
 
 // Delete the cached key from File storage
 func (f *file) Delete(key string) error {
-	_, err := os.Stat(
-		f.createName(key),
-	)
-
+	_, err := os.Stat(f.createName(key))
 	if err != nil && os.IsNotExist(err) {
 		return nil
 	}
@@ -139,10 +128,7 @@ func (f *file) Save(key string, value string, lifeTime time.Duration) error {
 		duration = time.Now().Unix() + int64(lifeTime.Seconds())
 	}
 
-	content := &fileContent{
-		duration,
-		value,
-	}
+	content := &fileContent{duration, value}
 
 	data, err := json.Marshal(content)
 	if err != nil {

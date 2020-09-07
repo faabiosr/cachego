@@ -32,24 +32,19 @@ func (b *bolt) read(key string) (*boltContent, error) {
 	var value []byte
 
 	err := b.db.View(func(tx *bt.Tx) error {
-		bucket := tx.Bucket(boltBucket)
-
-		if bucket == nil {
-			return errors.New("bucket not found")
+		if bucket := tx.Bucket(boltBucket); bucket != nil {
+			value = bucket.Get([]byte(key))
+			return nil
 		}
 
-		value = bucket.Get([]byte(key))
-
-		return nil
+		return errors.New("bucket not found")
 	})
 	if err != nil {
 		return nil, err
 	}
 
 	content := &boltContent{}
-
-	err = json.Unmarshal(value, content)
-	if err != nil {
+	if err := json.Unmarshal(value, content); err != nil {
 		return nil, err
 	}
 
@@ -62,31 +57,24 @@ func (b *bolt) read(key string) (*boltContent, error) {
 		return nil, errors.New("cache expired")
 	}
 
-	return content, err
+	return content, nil
 }
 
 // Contains checks if the cached key exists into the BoltDB storage
 func (b *bolt) Contains(key string) bool {
-	if _, err := b.read(key); err != nil {
-		return false
-	}
-
-	return true
+	_, err := b.read(key)
+	return err == nil
 }
 
 // Delete the cached key from BoltDB storage
 func (b *bolt) Delete(key string) error {
-	err := b.db.Update(func(tx *bt.Tx) error {
-		bucket := tx.Bucket(boltBucket)
-
-		if bucket == nil {
-			return errors.New("bucket not found")
+	return b.db.Update(func(tx *bt.Tx) error {
+		if bucket := tx.Bucket(boltBucket); bucket != nil {
+			return bucket.Delete([]byte(key))
 		}
 
-		return bucket.Delete([]byte(key))
+		return errors.New("bucket not found")
 	})
-
-	return err
 }
 
 // Fetch retrieves the cached value from key of the BoltDB storage
@@ -114,16 +102,9 @@ func (b *bolt) FetchMulti(keys []string) map[string]string {
 
 // Flush removes all cached keys of the BoltDB storage
 func (b *bolt) Flush() error {
-	err := b.db.Update(func(tx *bt.Tx) error {
-		err := tx.DeleteBucket(boltBucket)
-		if err != nil {
-			return err
-		}
-
-		return err
+	return b.db.Update(func(tx *bt.Tx) error {
+		return tx.DeleteBucket(boltBucket)
 	})
-
-	return err
 }
 
 // Save a value in BoltDB storage by key
@@ -134,17 +115,14 @@ func (b *bolt) Save(key string, value string, lifeTime time.Duration) error {
 		duration = time.Now().Unix() + int64(lifeTime.Seconds())
 	}
 
-	content := &boltContent{
-		duration,
-		value,
-	}
+	content := &boltContent{duration, value}
 
 	data, err := json.Marshal(content)
 	if err != nil {
 		return err
 	}
 
-	err = b.db.Update(func(tx *bt.Tx) error {
+	return b.db.Update(func(tx *bt.Tx) error {
 		bucket, err := tx.CreateBucketIfNotExists(boltBucket)
 		if err != nil {
 			return err
@@ -152,10 +130,4 @@ func (b *bolt) Save(key string, value string, lifeTime time.Duration) error {
 
 		return bucket.Put([]byte(key), data)
 	})
-
-	if err != nil {
-		return err
-	}
-
-	return nil
 }

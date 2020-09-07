@@ -3,6 +3,7 @@ package sqlite3
 import (
 	"database/sql"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"testing"
 	"time"
@@ -14,23 +15,28 @@ const (
 	testKey    = "foo"
 	testValue  = "bar"
 	testTable  = "cache"
-	testDBPath = "./cache.db"
+	testDBPath = "/cache.db"
 )
 
 func TestSqlite3(t *testing.T) {
-	db, err := sql.Open("sqlite3", testDBPath)
+	dir, err := ioutil.TempDir("", t.Name())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	db, err := sql.Open("sqlite3", dir+testDBPath)
 	if err != nil {
 		t.Skip(err)
 	}
+
+	t.Cleanup(func() {
+		_ = os.RemoveAll(dir)
+	})
 
 	c, err := New(db, testTable)
 	if err != nil {
 		t.Skip(err)
 	}
-
-	defer func() {
-		_ = os.Remove(testDBPath)
-	}()
 
 	if err := c.Save(testKey, testValue, 1*time.Nanosecond); err != nil {
 		t.Errorf("save fail: expected nil, got %v", err)
@@ -68,12 +74,17 @@ func TestSqlite3(t *testing.T) {
 }
 
 func TestSqlite3Fail(t *testing.T) {
-	db, _ := sql.Open("sqlite3", testDBPath)
+	dir, err := ioutil.TempDir("", t.Name())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	db, _ := sql.Open("sqlite3", dir+testDBPath)
 	_ = db.Close()
 
-	defer func() {
-		_ = os.Remove(testDBPath)
-	}()
+	t.Cleanup(func() {
+		_ = os.RemoveAll(dir)
+	})
 
 	if _, err := New(db, testTable); err == nil {
 		t.Errorf("constructor failed: expected an error, got %v", err)
