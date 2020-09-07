@@ -44,7 +44,6 @@ func (f *file) read(key string) (*fileContent, error) {
 	value, err := ioutil.ReadFile(
 		f.createName(key),
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +91,6 @@ func (f *file) Delete(key string) error {
 // Fetch retrieves the cached value from key of the File storage
 func (f *file) Fetch(key string) (string, error) {
 	content, err := f.read(key)
-
 	if err != nil {
 		return "", err
 	}
@@ -116,7 +114,6 @@ func (f *file) FetchMulti(keys []string) map[string]string {
 // Flush removes all cached keys of the File storage
 func (f *file) Flush() error {
 	dir, err := os.Open(f.dir)
-
 	if err != nil {
 		return err
 	}
@@ -148,7 +145,6 @@ func (f *file) Save(key string, value string, lifeTime time.Duration) error {
 	}
 
 	data, err := json.Marshal(content)
-
 	if err != nil {
 		return err
 	}

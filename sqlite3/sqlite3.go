@@ -49,7 +49,6 @@ func (s *sqlite3) Contains(key string) bool {
 // Delete the cached key from Sqlite3 storage
 func (s *sqlite3) Delete(key string) error {
 	tx, err := s.db.Begin()
-
 	if err != nil {
 		return err
 	}
@@ -57,7 +56,6 @@ func (s *sqlite3) Delete(key string) error {
 	stmt, err := tx.Prepare(
 		fmt.Sprintf("DELETE FROM %s WHERE key = ?", s.table),
 	)
-
 	if err != nil {
 		return err
 	}
@@ -78,7 +76,6 @@ func (s *sqlite3) Fetch(key string) (string, error) {
 	stmt, err := s.db.Prepare(
 		fmt.Sprintf("SELECT value, lifetime FROM %s WHERE key = ?", s.table),
 	)
-
 	if err != nil {
 		return "", err
 	}
@@ -123,7 +120,6 @@ func (s *sqlite3) FetchMulti(keys []string) map[string]string {
 // Flush removes all cached keys of the Sqlite3 storage
 func (s *sqlite3) Flush() error {
 	tx, err := s.db.Begin()
-
 	if err != nil {
 		return err
 	}
@@ -131,7 +127,6 @@ func (s *sqlite3) Flush() error {
 	stmt, err := tx.Prepare(
 		fmt.Sprintf("DELETE FROM %s", s.table),
 	)
-
 	if err != nil {
 		return err
 	}
@@ -156,7 +151,6 @@ func (s *sqlite3) Save(key string, value string, lifeTime time.Duration) error {
 	}
 
 	tx, err := s.db.Begin()
-
 	if err != nil {
 		return err
 	}
@@ -164,7 +158,6 @@ func (s *sqlite3) Save(key string, value string, lifeTime time.Duration) error {
 	stmt, err := tx.Prepare(
 		fmt.Sprintf("INSERT OR REPLACE INTO %s (key, value, lifetime) VALUES (?, ?, ?)", s.table),
 	)
-
 	if err != nil {
 		return err
 	}

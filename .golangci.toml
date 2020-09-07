@@ -8,7 +8,7 @@ format = "colored-line-number"
 enable = [
     "interfacer", "gocyclo", "unconvert", "goimports", "unused", "varcheck",
     "vetshadow", "misspell", "nakedret", "errcheck", "golint", "ineffassign",
-    "deadcode", "goconst", "vet", "unparam", "gofmt"
+    "deadcode", "goconst", "vet", "unparam", "gofumpt"
 ]
 
 [issues]

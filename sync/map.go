@@ -63,7 +63,6 @@ func (sm *syncMap) Delete(key string) error {
 // Fetch retrieves the cached value from key of the SyncMap storage
 func (sm *syncMap) Fetch(key string) (string, error) {
 	item, err := sm.read(key)
-
 	if err != nil {
 		return "", err
 	}

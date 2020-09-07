@@ -21,7 +21,6 @@ func TestMongo(t *testing.T) {
 	}
 
 	session, err := mgo.Dial(address)
-
 	if err != nil {
 		t.Skip(err)
 	}

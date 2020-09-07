@@ -45,7 +45,6 @@ func (m *mongo) Fetch(key string) (string, error) {
 	content := &mongoContent{}
 
 	err := m.collection.Find(bson.M{"_id": key}).One(content)
-
 	if err != nil {
 		return "", err
 	}

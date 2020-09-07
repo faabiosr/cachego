@@ -42,7 +42,6 @@ func (b *bolt) read(key string) (*boltContent, error) {
 
 		return nil
 	})
-
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +49,6 @@ func (b *bolt) read(key string) (*boltContent, error) {
 	content := &boltContent{}
 
 	err = json.Unmarshal(value, content)
-
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +92,6 @@ func (b *bolt) Delete(key string) error {
 // Fetch retrieves the cached value from key of the BoltDB storage
 func (b *bolt) Fetch(key string) (string, error) {
 	content, err := b.read(key)
-
 	if err != nil {
 		return "", err
 	}
@@ -119,7 +116,6 @@ func (b *bolt) FetchMulti(keys []string) map[string]string {
 func (b *bolt) Flush() error {
 	err := b.db.Update(func(tx *bt.Tx) error {
 		err := tx.DeleteBucket(boltBucket)
-
 		if err != nil {
 			return err
 		}
@@ -144,14 +140,12 @@ func (b *bolt) Save(key string, value string, lifeTime time.Duration) error {
 	}
 
 	data, err := json.Marshal(content)
-
 	if err != nil {
 		return err
 	}
 
 	err = b.db.Update(func(tx *bt.Tx) error {
 		bucket, err := tx.CreateBucketIfNotExists(boltBucket)
-
 		if err != nil {
 			return err
 		}

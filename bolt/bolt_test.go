@@ -19,7 +19,6 @@ func TestBolt(t *testing.T) {
 	_ = os.Mkdir(dir, 0777)
 
 	db, err := bt.Open(fmt.Sprintf("%s/cachego.db", dir), 0600, nil)
-
 	if err != nil {
 		t.Skip(err)
 	}
@@ -78,7 +77,6 @@ func TestBoltSaveWithReadOnlyDB(t *testing.T) {
 	_ = os.Mkdir(dir, 0777)
 
 	db, err := bt.Open(fmt.Sprintf("%s/cachego.db", dir), 0666, &bt.Options{ReadOnly: true})
-
 	if err != nil {
 		t.Skip(err)
 	}
@@ -91,6 +89,5 @@ func TestBoltSaveWithReadOnlyDB(t *testing.T) {
 
 	if err := c.Save(testKey, testValue, 0); err == nil {
 		t.Errorf("save failed: expected error, got %v", err)
-
 	}
 }

@@ -35,7 +35,6 @@ func (m *memcached) Delete(key string) error {
 // Fetch retrieves the cached value from key of the Memcached storage
 func (m *memcached) Fetch(key string) (string, error) {
 	item, err := m.driver.Get(key)
-
 	if err != nil {
 		return "", err
 	}
@@ -48,7 +47,6 @@ func (m *memcached) FetchMulti(keys []string) map[string]string {
 	result := make(map[string]string)
 
 	items, err := m.driver.GetMulti(keys)
-
 	if err != nil {
 		return result
 	}

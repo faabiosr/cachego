@@ -19,13 +19,11 @@ const (
 
 func TestSqlite3(t *testing.T) {
 	db, err := sql.Open("sqlite3", testDBPath)
-
 	if err != nil {
 		t.Skip(err)
 	}
 
 	c, err := New(db, testTable)
-
 	if err != nil {
 		t.Skip(err)
 	}
