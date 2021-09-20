@@ -25,6 +25,8 @@ type (
 	}
 )
 
+const perm = 0o666
+
 // New creates an instance of File cache
 func New(dir string) cachego.Cache {
 	return &file{dir}
@@ -135,5 +137,5 @@ func (f *file) Save(key string, value string, lifeTime time.Duration) error {
 		return err
 	}
 
-	return ioutil.WriteFile(f.createName(key), data, 0666)
+	return ioutil.WriteFile(f.createName(key), data, perm)
 }

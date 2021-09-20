@@ -21,7 +21,7 @@ func TestBolt(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	db, err := bt.Open(fmt.Sprintf("%s/cachego.db", dir), 0600, nil)
+	db, err := bt.Open(fmt.Sprintf("%s/cachego.db", dir), 0o600, nil)
 	if err != nil {
 		t.Fatal(err)
 	}

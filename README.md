@@ -1,6 +1,5 @@
 # Cachego
 
-[![Build Status](https://img.shields.io/travis/faabiosr/cachego/master.svg?style=flat-square)](https://travis-ci.org/faabiosr/cachego)
 [![Codecov branch](https://img.shields.io/codecov/c/github/faabiosr/cachego/master.svg?style=flat-square)](https://codecov.io/gh/faabiosr/cachego)
 [![GoDoc](https://img.shields.io/badge/godoc-reference-5272B4.svg?style=flat-square)](https://pkg.go.dev/github.com/faabiosr/cachego)
 [![Go Report Card](https://goreportcard.com/badge/github.com/faabiosr/cachego?style=flat-square)](https://goreportcard.com/report/github.com/faabiosr/cachego)

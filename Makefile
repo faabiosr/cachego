@@ -2,13 +2,13 @@
 
 # Clean up
 clean:
-	@rm -fR ./coverage*
+	@rm -fR ./cover*
 .PHONY: clean
 
 # Run tests and generates html coverage file
 cover: test
-	@go tool cover -html=./coverage.text -o ./coverage.html
-	@test -f ./coverage.text && rm ./coverage.text;
+	@go tool cover -html=./cover.text -o ./cover.html
+	@test -f ./cover.out && rm ./cover.out;
 .PHONY: cover
 
 # Up the docker container for testing
@@ -28,5 +28,5 @@ lint:
 
 # Run tests
 test:
-	@go test -v -race -coverprofile=./coverage.text -covermode=atomic $(shell go list ./...)
+	@go test -v -race -coverprofile=./cover.text -covermode=atomic $(shell go list ./...)
 .PHONY: test

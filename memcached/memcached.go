@@ -34,7 +34,7 @@ func (m *memcached) Fetch(key string) (string, error) {
 		return "", err
 	}
 
-	return string(item.Value[:]), nil
+	return string(item.Value), nil
 }
 
 // FetchMulti retrieves multiple cached value from keys of the Memcached storage
@@ -47,7 +47,7 @@ func (m *memcached) FetchMulti(keys []string) map[string]string {
 	}
 
 	for _, i := range items {
-		result[i.Key] = string(i.Value[:])
+		result[i.Key] = string(i.Value)
 	}
 
 	return result
