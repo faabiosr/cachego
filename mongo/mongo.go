@@ -1,17 +1,19 @@
 package mongo
 
 import (
+	"context"
 	"errors"
 	"time"
 
 	"github.com/faabiosr/cachego"
-	"gopkg.in/mgo.v2"
-	"gopkg.in/mgo.v2/bson"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type (
-	mongo struct {
-		collection *mgo.Collection
+	mongoCache struct {
+		collection *mongo.Collection
 	}
 
 	mongoContent struct {
@@ -21,30 +23,37 @@ type (
 	}
 )
 
-// New creates an instance of Mongo cache driver
-func New(collection *mgo.Collection) cachego.Cache {
-	return &mongo{collection}
+// NewMongoDriver creates an instance of Mongo cache driver
+func NewMongoDriver(collection *mongo.Collection) cachego.Cache {
+	return &mongoCache{collection}
 }
 
-// Contains checks if cached key exists in Mongo storage
-func (m *mongo) Contains(key string) bool {
+func (m *mongoCache) Contains(key string) bool {
 	_, err := m.Fetch(key)
 	return err == nil
 }
 
 // Delete the cached key from Mongo storage
-func (m *mongo) Delete(key string) error {
-	return m.collection.Remove(bson.M{"_id": key})
+func (m *mongoCache) Delete(key string) error {
+	_, err := m.collection.DeleteOne(context.TODO(), bson.M{"_id": bson.M{"$eq": key}})
+	return err
 }
 
 // Fetch retrieves the cached value from key of the Mongo storage
-func (m *mongo) Fetch(key string) (string, error) {
+func (m *mongoCache) Fetch(key string) (string, error) {
 	content := &mongoContent{}
-
-	if err := m.collection.Find(bson.M{"_id": key}).One(content); err != nil {
-		return "", err
+	result := m.collection.FindOne(context.TODO(), bson.M{"_id": bson.M{"$eq": key}})
+	if result == nil {
+		return "", errors.New("cache expired")
+	}
+	if result.Err() != nil {
+		return "", result.Err()
 	}
 
+	err := result.Decode(&content)
+	if err != nil {
+		return "", err
+	}
 	if content.Duration == 0 {
 		return content.Value, nil
 	}
@@ -53,31 +62,41 @@ func (m *mongo) Fetch(key string) (string, error) {
 		_ = m.Delete(key)
 		return "", errors.New("cache expired")
 	}
-
 	return content.Value, nil
 }
 
-// FetchMulti retrieves multiple cached value from keys of the Mongo storage
-func (m *mongo) FetchMulti(keys []string) map[string]string {
+func (m *mongoCache) FetchMulti(keys []string) map[string]string {
 	result := make(map[string]string)
-	iter := m.collection.Find(bson.M{"_id": bson.M{"$in": keys}}).Iter()
+
+	cur, err := m.collection.Find(context.TODO(), bson.M{"_id": bson.M{"$in": keys}})
+	if err != nil {
+		return result
+	}
+	defer func() {
+		_ = cur.Close(context.Background())
+	}()
+
 	content := &mongoContent{}
 
-	for iter.Next(content) {
+	for cur.Next(context.Background()) {
+		err := cur.Decode(content)
+		if err != nil {
+			continue
+		}
+
 		result[content.Key] = content.Value
 	}
-
 	return result
 }
 
 // Flush removes all cached keys of the Mongo storage
-func (m *mongo) Flush() error {
-	_, err := m.collection.RemoveAll(bson.M{})
+func (m *mongoCache) Flush() error {
+	_, err := m.collection.DeleteMany(context.TODO(), bson.M{})
 	return err
 }
 
 // Save a value in Mongo storage by key
-func (m *mongo) Save(key string, value string, lifeTime time.Duration) error {
+func (m *mongoCache) Save(key string, value string, lifeTime time.Duration) error {
 	duration := int64(0)
 
 	if lifeTime > 0 {
@@ -85,7 +104,7 @@ func (m *mongo) Save(key string, value string, lifeTime time.Duration) error {
 	}
 
 	content := &mongoContent{duration, key, value}
-
-	_, err := m.collection.Upsert(bson.M{"_id": key}, content)
+	opts := options.Replace().SetUpsert(true)
+	_, err := m.collection.ReplaceOne(context.TODO(), bson.M{"_id": bson.M{"$eq": key}}, content, opts)
 	return err
 }
