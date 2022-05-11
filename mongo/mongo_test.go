@@ -1,63 +1,65 @@
 package mongo
 
 import (
-	"net"
+	"context"
+	"fmt"
 	"testing"
 	"time"
 
-	"gopkg.in/mgo.v2"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 const (
-	testKey   = "foo"
-	testValue = "bar"
+	testKeyMongo   = "foo1"
+	testValueMongo = "bar"
 )
 
 func TestMongo(t *testing.T) {
-	address := "localhost:27017"
+	// Set client options
+	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
 
-	if _, err := net.Dial("tcp", address); err != nil {
-		t.Skip(err)
-	}
-
-	session, err := mgo.Dial(address)
+	// Connect to MongoDB
+	client, err := mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {
 		t.Skip(err)
 	}
+	collection := client.Database("cache").Collection("cache")
 
-	c := New(session.DB("cache").C("cache"))
+	cache := NewMongoDriver(collection)
 
-	if err := c.Save(testKey, testValue, 1*time.Nanosecond); err != nil {
+	if err := cache.Save(testKeyMongo, testValueMongo, 1*time.Nanosecond); err != nil {
 		t.Errorf("save fail: expected nil, got %v", err)
 	}
 
-	if _, err := c.Fetch(testKey); err == nil {
-		t.Errorf("fetch fail: expected an error, got %v", err)
+	if v, err := cache.Fetch(testKeyMongo); err == nil {
+		t.Errorf("fetch fail: expected an error, got %v value %v", err, v)
 	}
 
-	_ = c.Save(testKey, testValue, 10*time.Second)
+	_ = cache.Save(testKeyMongo, testValueMongo, 10*time.Second)
 
-	if res, _ := c.Fetch(testKey); res != testValue {
-		t.Errorf("fetch fail, wrong value: expected %s, got %s", testValue, res)
+	if res, _ := cache.Fetch(testKeyMongo); res != testValueMongo {
+		t.Errorf("fetch fail, wrong value : expected %s, got %s", testValueMongo, res)
 	}
 
-	_ = c.Save(testKey, testValue, 0)
+	_ = cache.Save(testKeyMongo, testValueMongo, 0)
 
-	if !c.Contains(testKey) {
-		t.Errorf("contains failed: the key %s should be exist", testKey)
+	if !cache.Contains(testKeyMongo) {
+		t.Errorf("contains failed: the key %s should be exist", testKeyMongo)
 	}
 
-	_ = c.Save("bar", testValue, 0)
+	_ = cache.Save("bar", testValueMongo, 0)
 
-	if values := c.FetchMulti([]string{testKey, "bar"}); len(values) == 0 {
+	if values := cache.FetchMulti([]string{testKeyMongo, "bar"}); len(values) != 2 {
+		fmt.Println(values)
 		t.Errorf("fetch multi failed: expected %d, got %d", 2, len(values))
 	}
 
-	if err := c.Flush(); err != nil {
+	if err := cache.Flush(); err != nil {
 		t.Errorf("flush failed: expected nil, got %v", err)
 	}
 
-	if c.Contains(testKey) {
-		t.Errorf("contains failed: the key %s should not be exist", testKey)
+	if cache.Contains(testKeyMongo) {
+		t.Errorf("contains failed: the key %s should not be exist", testKeyMongo)
 	}
 }

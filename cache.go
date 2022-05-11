@@ -7,7 +7,6 @@ import (
 type (
 	// Cache is the top-level cache interface
 	Cache interface {
-
 		// Contains check if a cached key exists
 		Contains(key string) bool
 
