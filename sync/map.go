@@ -1,3 +1,4 @@
+// Package sync providers a cache driver that uses standard golang sync.Map.
 package sync
 
 import (

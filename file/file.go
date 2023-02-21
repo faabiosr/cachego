@@ -1,3 +1,4 @@
+// Package file providers a cache driver that stores the cache content in files.
 package file
 
 import (

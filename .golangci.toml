@@ -6,10 +6,9 @@ format = "colored-line-number"
 
 [linters]
 enable = [
-    "gocyclo", "unconvert", "goimports", "unused", "varcheck", "vetshadow",
-    "misspell", "nakedret", "errcheck", "revive", "ineffassign", "deadcode",
-    "goconst", "vet", "unparam", "gofumpt", "prealloc", "gomnd", "gocritic"
-]
+    "gocyclo", "unconvert", "goimports", "unused", "vetshadow","misspell",
+    "nakedret", "errcheck", "revive", "ineffassign", "goconst", "vet",
+    "unparam", "gofumpt", "prealloc", "gomnd", "gocritic"]
 
 [issues]
 exclude-use-default = false

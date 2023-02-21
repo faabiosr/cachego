@@ -1,3 +1,5 @@
+// Package chain provides chaining cache drivers operations, in case of failure
+// the driver try to apply using the next driver informed, until fail.
 package chain
 
 import (

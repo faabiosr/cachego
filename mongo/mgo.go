@@ -1,3 +1,4 @@
+// Package mongo providers a cache driver that uses MongoDB with MGO driver.
 package mongo
 
 import (

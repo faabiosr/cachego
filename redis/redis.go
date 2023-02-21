@@ -1,3 +1,4 @@
+// Package redis providers a cache driver that stores the cache in Redis.
 package redis
 
 import (
