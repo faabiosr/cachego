@@ -1,3 +1,4 @@
+// Package memcached providers a cache driver that stores the cache in Memcached.
 package memcached
 
 import (

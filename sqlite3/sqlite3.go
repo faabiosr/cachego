@@ -1,3 +1,4 @@
+// Package sqlite3 providers a cache driver that stores the cache in SQLite3.
 package sqlite3
 
 import (

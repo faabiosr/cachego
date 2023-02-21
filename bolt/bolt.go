@@ -1,3 +1,4 @@
+// Package bolt providers a cache driver that stores the cache using BoltDB.
 package bolt
 
 import (

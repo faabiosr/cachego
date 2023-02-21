@@ -2,7 +2,7 @@
 
 # Clean up
 clean:
-	@rm -fR ./cover*
+	@rm -fR ./vendor/ ./cover.*
 .PHONY: clean
 
 # Run tests and generates html coverage file
