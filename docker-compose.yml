@@ -1,15 +1,16 @@
 ---
-memcached:
-    image: "memcached:alpine"
-    ports:
-        - "11211:11211"
+services:
+  memcached:
+      image: "memcached:alpine"
+      ports:
+          - "11211:11211"
 
-redis:
-    image: "redis:alpine"
-    ports:
-        - "6379:6379"
+  redis:
+      image: "redis:alpine"
+      ports:
+          - "6379:6379"
 
-mongodb:
-    image: "mongo:3.3"
-    ports:
-        - "27017:27017"
+  mongodb:
+      image: "mongo:3.6"
+      ports:
+          - "27017:27017"

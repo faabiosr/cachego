@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	rd "gopkg.in/redis.v4"
+	rd "gopkg.in/redis.v5"
 )
 
 const (

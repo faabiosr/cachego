@@ -4,18 +4,27 @@ package redis
 import (
 	"time"
 
+	rd "gopkg.in/redis.v5"
+
 	"github.com/faabiosr/cachego"
-	rd "gopkg.in/redis.v4"
 )
 
-type (
-	redis struct {
-		driver rd.BaseCmdable
-	}
-)
+type redis struct {
+	driver Cmdable
+}
+
+// Cmdable defines the base commands used by redis driver.
+type Cmdable interface {
+	Exists(key string) *rd.BoolCmd
+	Del(keys ...string) *rd.IntCmd
+	Get(key string) *rd.StringCmd
+	MGet(keys ...string) *rd.SliceCmd
+	FlushAll() *rd.StatusCmd
+	Set(key string, value interface{}, expiration time.Duration) *rd.StatusCmd
+}
 
 // New creates an instance of Redis cache driver
-func New(driver rd.BaseCmdable) cachego.Cache {
+func New(driver Cmdable) cachego.Cache {
 	return &redis{driver}
 }
 
