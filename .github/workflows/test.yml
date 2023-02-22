@@ -33,7 +33,7 @@ jobs:
         ports:
           - 6379:6379
       mongodb:
-        image: mongo:3.3
+        image: mongo:3.6
         ports:
           - 27017:27017
 

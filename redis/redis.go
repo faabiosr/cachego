@@ -4,7 +4,7 @@ package redis
 import (
 	"time"
 
-	rd "gopkg.in/redis.v4"
+	rd "gopkg.in/redis.v5"
 
 	"github.com/faabiosr/cachego"
 )
