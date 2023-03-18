@@ -4,11 +4,11 @@ go 1.17
 
 require (
 	github.com/bradfitz/gomemcache v0.0.0-20230124162541-5f7a7d875746
+	github.com/go-redis/redis/v7 v7.4.1
 	github.com/mattn/go-sqlite3 v1.14.16
 	go.etcd.io/bbolt v1.3.7
 	go.mongodb.org/mongo-driver v1.11.2
 	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22
-	gopkg.in/redis.v5 v5.2.9
 )
 
 require (

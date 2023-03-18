@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	rd "gopkg.in/redis.v5"
+	rd "github.com/go-redis/redis/v7"
 )
 
 const (

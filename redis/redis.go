@@ -4,34 +4,24 @@ package redis
 import (
 	"time"
 
-	rd "gopkg.in/redis.v5"
+	rd "github.com/go-redis/redis/v7"
 
 	"github.com/faabiosr/cachego"
 )
 
 type redis struct {
-	driver Cmdable
-}
-
-// Cmdable defines the base commands used by redis driver.
-type Cmdable interface {
-	Exists(key string) *rd.BoolCmd
-	Del(keys ...string) *rd.IntCmd
-	Get(key string) *rd.StringCmd
-	MGet(keys ...string) *rd.SliceCmd
-	FlushAll() *rd.StatusCmd
-	Set(key string, value interface{}, expiration time.Duration) *rd.StatusCmd
+	driver rd.Cmdable
 }
 
 // New creates an instance of Redis cache driver
-func New(driver Cmdable) cachego.Cache {
+func New(driver rd.Cmdable) cachego.Cache {
 	return &redis{driver}
 }
 
 // Contains checks if cached key exists in Redis storage
 func (r *redis) Contains(key string) bool {
-	status, _ := r.driver.Exists(key).Result()
-	return status
+	i, _ := r.driver.Exists(key).Result()
+	return i > 0
 }
 
 // Delete the cached key from Redis storage
