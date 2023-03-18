@@ -5,7 +5,7 @@ import (
 	"context"
 	"time"
 
-	rd "github.com/go-redis/redis/v8"
+	rd "github.com/redis/go-redis/v9"
 
 	"github.com/faabiosr/cachego"
 )
