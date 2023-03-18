@@ -1,3 +1,4 @@
+// Package mongo providers a cache driver that stores the cache in MongoDB.
 package mongo
 
 import (
@@ -23,9 +24,14 @@ type (
 	}
 )
 
-// NewMongoDriver creates an instance of Mongo cache driver
-func NewMongoDriver(collection *mongo.Collection) cachego.Cache {
+// New creates an instance of Mongo cache driver
+func New(collection *mongo.Collection) cachego.Cache {
 	return &mongoCache{collection}
+}
+
+// NewMongoDriver alias for New.
+func NewMongoDriver(collection *mongo.Collection) cachego.Cache {
+	return New(collection)
 }
 
 func (m *mongoCache) Contains(key string) bool {
