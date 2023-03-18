@@ -26,7 +26,7 @@ func TestMongo(t *testing.T) {
 	}
 	collection := client.Database("cache").Collection("cache")
 
-	cache := NewMongoDriver(collection)
+	cache := New(collection)
 
 	if err := cache.Save(testKeyMongo, testValueMongo, 1*time.Nanosecond); err != nil {
 		t.Errorf("save fail: expected nil, got %v", err)

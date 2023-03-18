@@ -7,20 +7,23 @@ The drivers uses [go-mgo](https://github.com/go-mgo/mgo) to store the cache data
 package main
 
 import (
+	"context"
 	"log"
 	"time"
 
-	"gopkg.in/mgo.v2"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"github.com/faabiosr/cachego/mongo"
 )
 
 func main() {
-	session, _ := mgo.Dial("localhost:27017")
+	opts := options.Client().ApplyURI("mongodb://localhost:27017")
+	client, _ := mongo.Connect(context.Background(), opts)
 
 	cache := mongo.New(
-		session.DB("cache").C("cache"),
-	)
+	    client.Database("cache").Collection("cache"),
+    )
 
 	if err := cache.Save("user_id", "1", 10*time.Second); err != nil {
 		log.Fatal(err)
