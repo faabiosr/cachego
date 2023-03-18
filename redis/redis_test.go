@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	rd "github.com/go-redis/redis/v7"
+	rd "github.com/go-redis/redis/v8"
 )
 
 const (
