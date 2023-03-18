@@ -10,7 +10,7 @@ import (
 	"log"
 	"time"
 
-	rd "gopkg.in/redis.v4"
+	rd "github.com/go-redis/redis/v8"
 
 	"github.com/faabiosr/cachego/redis"
 )
