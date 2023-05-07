@@ -3,7 +3,6 @@ package sqlite3
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 	"time"
 
@@ -93,7 +92,7 @@ func (s *sqlite3) Fetch(key string) (string, error) {
 
 	if lifetime <= time.Now().Unix() {
 		_ = s.Delete(key)
-		return "", errors.New("cache expired")
+		return "", cachego.ErrCacheExpired
 	}
 
 	return value, nil
