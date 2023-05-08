@@ -55,7 +55,7 @@ func (b *bolt) read(key string) (*boltContent, error) {
 
 	if content.Duration <= time.Now().Unix() {
 		_ = b.Delete(key)
-		return nil, errors.New("cache expired")
+		return nil, cachego.ErrCacheExpired
 	}
 
 	return content, nil

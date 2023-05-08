@@ -3,7 +3,6 @@ package mongo
 
 import (
 	"context"
-	"errors"
 	"time"
 
 	"github.com/faabiosr/cachego"
@@ -50,7 +49,7 @@ func (m *mongoCache) Fetch(key string) (string, error) {
 	content := &mongoContent{}
 	result := m.collection.FindOne(context.TODO(), bson.M{"_id": bson.M{"$eq": key}})
 	if result == nil {
-		return "", errors.New("cache expired")
+		return "", cachego.ErrCacheExpired
 	}
 	if result.Err() != nil {
 		return "", result.Err()
@@ -66,7 +65,7 @@ func (m *mongoCache) Fetch(key string) (string, error) {
 
 	if content.Duration <= time.Now().Unix() {
 		_ = m.Delete(key)
-		return "", errors.New("cache expired")
+		return "", cachego.ErrCacheExpired
 	}
 	return content.Value, nil
 }
