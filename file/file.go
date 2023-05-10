@@ -5,11 +5,11 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"sync"
 	"time"
 
 	"github.com/faabiosr/cachego"
@@ -18,6 +18,7 @@ import (
 type (
 	file struct {
 		dir string
+		sync.RWMutex
 	}
 
 	fileContent struct {
@@ -30,7 +31,7 @@ const perm = 0o666
 
 // New creates an instance of File cache
 func New(dir string) cachego.Cache {
-	return &file{dir}
+	return &file{dir: dir}
 }
 
 func (f *file) createName(key string) string {
@@ -42,6 +43,9 @@ func (f *file) createName(key string) string {
 }
 
 func (f *file) read(key string) (*fileContent, error) {
+	f.RLock()
+	defer f.RUnlock()
+
 	value, err := ioutil.ReadFile(f.createName(key))
 	if err != nil {
 		return nil, err
@@ -56,22 +60,28 @@ func (f *file) read(key string) (*fileContent, error) {
 		return content, nil
 	}
 
-	if content.Duration <= time.Now().Unix() {
-		_ = f.Delete(key)
-		return nil, errors.New("cache expired")
-	}
-
 	return content, nil
 }
 
 // Contains checks if the cached key exists into the File storage
 func (f *file) Contains(key string) bool {
-	_, err := f.read(key)
-	return err == nil
+	content, err := f.read(key)
+	if err != nil {
+		return false
+	}
+
+	if f.isExpired(content) {
+		_ = f.Delete(key)
+		return false
+	}
+	return true
 }
 
 // Delete the cached key from File storage
 func (f *file) Delete(key string) error {
+	f.Lock()
+	defer f.Unlock()
+
 	_, err := os.Stat(f.createName(key))
 	if err != nil && os.IsNotExist(err) {
 		return nil
@@ -87,7 +97,16 @@ func (f *file) Fetch(key string) (string, error) {
 		return "", err
 	}
 
+	if f.isExpired(content) {
+		_ = f.Delete(key)
+		return "", cachego.ErrCacheExpired
+	}
+
 	return content.Data, nil
+}
+
+func (f *file) isExpired(content *fileContent) bool {
+	return content.Duration > 0 && content.Duration <= time.Now().Unix()
 }
 
 // FetchMulti retrieve multiple cached values from keys of the File storage
@@ -105,6 +124,9 @@ func (f *file) FetchMulti(keys []string) map[string]string {
 
 // Flush removes all cached keys of the File storage
 func (f *file) Flush() error {
+	f.Lock()
+	defer f.Unlock()
+
 	dir, err := os.Open(f.dir)
 	if err != nil {
 		return err
@@ -125,14 +147,15 @@ func (f *file) Flush() error {
 
 // Save a value in File storage by key
 func (f *file) Save(key string, value string, lifeTime time.Duration) error {
-	duration := int64(0)
+	f.Lock()
+	defer f.Unlock()
 
+	duration := int64(0)
 	if lifeTime > 0 {
 		duration = time.Now().Unix() + int64(lifeTime.Seconds())
 	}
 
 	content := &fileContent{duration, value}
-
 	data, err := json.Marshal(content)
 	if err != nil {
 		return err
