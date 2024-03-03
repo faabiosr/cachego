@@ -2,7 +2,6 @@ package bolt
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"testing"
 	"time"
@@ -16,10 +15,7 @@ const (
 )
 
 func TestBolt(t *testing.T) {
-	dir, err := ioutil.TempDir("", t.Name())
-	if err != nil {
-		t.Fatal(err)
-	}
+	dir := os.TempDir()
 
 	db, err := bt.Open(fmt.Sprintf("%s/cachego.db", dir), 0o600, nil)
 	if err != nil {

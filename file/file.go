@@ -6,7 +6,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sync"
@@ -46,7 +45,7 @@ func (f *file) read(key string) (*fileContent, error) {
 	f.RLock()
 	defer f.RUnlock()
 
-	value, err := ioutil.ReadFile(f.createName(key))
+	value, err := os.ReadFile(f.createName(key))
 	if err != nil {
 		return nil, err
 	}
@@ -161,5 +160,5 @@ func (f *file) Save(key string, value string, lifeTime time.Duration) error {
 		return err
 	}
 
-	return ioutil.WriteFile(f.createName(key), data, perm)
+	return os.WriteFile(f.createName(key), data, perm)
 }
