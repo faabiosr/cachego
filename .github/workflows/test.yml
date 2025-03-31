@@ -3,11 +3,11 @@ name: test
 on:
   push:
     branches:
-      - master
+      - main
       - develop
   pull_request:
     branches:
-      - master
+      - main
 
 jobs:
   test:
@@ -58,6 +58,6 @@ jobs:
 
       - name: upload code coverage
         uses: codecov/codecov-action@v3.1.1
-        if: contains(github.ref, 'master')
+        if: contains(github.ref, 'main')
         with:
           file: ./cover.out

@@ -63,4 +63,5 @@ See #284
 ## Submit a pull request
 
 Push your branch to your `cachego` fork and open a pull request against the
-master branch.
+main branch.
+

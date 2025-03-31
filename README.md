@@ -1,9 +1,9 @@
 # Cachego
 
-[![Codecov branch](https://img.shields.io/codecov/c/github/faabiosr/cachego/master.svg?style=flat-square)](https://codecov.io/gh/faabiosr/cachego)
+[![Codecov branch](https://img.shields.io/codecov/c/github/faabiosr/cachego/main.svg?style=flat-square)](https://codecov.io/gh/faabiosr/cachego)
 [![GoDoc](https://img.shields.io/badge/godoc-reference-5272B4.svg?style=flat-square)](https://pkg.go.dev/github.com/faabiosr/cachego)
 [![Go Report Card](https://goreportcard.com/badge/github.com/faabiosr/cachego?style=flat-square)](https://goreportcard.com/report/github.com/faabiosr/cachego)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://github.com/faabiosr/cachego/blob/master/LICENSE)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://github.com/faabiosr/cachego/blob/main/LICENSE)
 
 Simple interface for caching
 
@@ -108,4 +108,4 @@ $ make test
 
 ## License
 
-This project is released under the MIT licence. See [LICENSE](https://github.com/faabiosr/cachego/blob/master/LICENSE) for more details.
+This project is released under the MIT licence. See [LICENSE](https://github.com/faabiosr/cachego/blob/main/LICENSE) for more details.
