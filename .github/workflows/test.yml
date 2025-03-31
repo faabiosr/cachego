@@ -51,7 +51,7 @@ jobs:
       - name: golanci-linter
         uses: golangci/golangci-lint-action@v3
         with:
-          version: v1.51.2
+          version: v1.53.3
 
       - name: run unit tests
         run: make test
