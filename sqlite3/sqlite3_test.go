@@ -3,7 +3,6 @@ package sqlite3
 import (
 	"database/sql"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"testing"
 	"time"
@@ -19,7 +18,7 @@ const (
 )
 
 func TestSqlite3(t *testing.T) {
-	dir, err := ioutil.TempDir("", t.Name())
+	dir, err := os.MkdirTemp("", t.Name())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -74,7 +73,7 @@ func TestSqlite3(t *testing.T) {
 }
 
 func TestSqlite3Fail(t *testing.T) {
-	dir, err := ioutil.TempDir("", t.Name())
+	dir, err := os.MkdirTemp("", t.Name())
 	if err != nil {
 		t.Fatal(err)
 	}
