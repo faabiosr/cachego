@@ -9,7 +9,7 @@ Simple interface for caching
 
 ## Installation
 
-Cachego requires Go 1.18 or later.
+Cachego requires Go 1.19 or later.
 
 ```
 go get github.com/faabiosr/cachego
