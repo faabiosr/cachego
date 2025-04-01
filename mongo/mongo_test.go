@@ -1,13 +1,12 @@
 package mongo
 
 import (
-	"context"
 	"fmt"
 	"testing"
 	"time"
 
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 const (
@@ -20,7 +19,7 @@ func TestMongo(t *testing.T) {
 	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
 
 	// Connect to MongoDB
-	client, err := mongo.Connect(context.TODO(), clientOptions)
+	client, err := mongo.Connect(clientOptions)
 	if err != nil {
 		t.Skip(err)
 	}
