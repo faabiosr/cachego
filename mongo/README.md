@@ -11,15 +11,15 @@ import (
 	"log"
 	"time"
 
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 
 	"github.com/faabiosr/cachego/mongo"
 )
 
 func main() {
 	opts := options.Client().ApplyURI("mongodb://localhost:27017")
-	client, _ := mongo.Connect(context.Background(), opts)
+	client, _ := mongo.Connect(opts)
 
 	cache := mongo.New(
 	    client.Database("cache").Collection("cache"),
